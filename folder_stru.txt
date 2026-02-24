@@ -1,0 +1,83 @@
+vendor-go/
+│
+├── app.js
+├── package.json
+│
+├── routes/
+│   ├── vendor.js
+│   ├── customer.js
+│   ├── admin.js
+│
+├── data/
+│   └── db.js
+│
+├── views/
+│   ├── vendor/
+│   ├── customer/
+│   ├── admin/
+│   └── partials/
+│
+└── public/
+    ├── css/
+    └── js/
+
+
+
+
+
+  <!-- Main Content -->
+  <div class="container">
+    <div class="login-box">
+      <h2>Vendor Login</h2>
+
+      <form action="/vendor/login" method="POST">
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+      </form>
+
+      <% if (typeof error !== "undefined") { %>
+        <p class="error"><%= error %></p>
+      <% } %>
+    </div>
+  </div>
+
+📋 Key Implementation Points
+Middleware Setup
+Body parser for form data
+Session management for login
+View engine (EJS/Handlebars)
+Data Flow
+Vendor → Adds products to shared array
+Customer → Views products, places orders
+Admin → Monitors all activity
+Security Considerations
+Add password hashing (bcrypt)
+Implement proper session management
+Input validation and sanitization
+Route protection middleware
+Database Integration
+Replace arrays with actual database calls:
+
+javascript
+
+
+// Instead of: products.push(newProduct)
+// Use: await Product.create(newProduct)
+🎯 Testing Your Routes
+Vendor Flow:
+
+GET /vendor/login → Login form
+POST /vendor/login → Authenticate
+GET /vendor/dashboard → See products
+GET /vendor/add-product → Product form
+POST /vendor/add-product → Save product
+Customer Flow:
+
+GET / → Browse products
+POST /order → Place order
+GET /orders → View order history
+Admin Flow:
+
+GET /admin → Overview dashboard
+This structure gives you a complete, working multi-user system that's perfect for a university project! 🚀

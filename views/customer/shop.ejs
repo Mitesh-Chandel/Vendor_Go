@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Customer Shop</title>
+  <style>
+    /* General Styles */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    a {
+      text-decoration: none;
+      color: #27ae60;
+      font-weight: bold;
+    }
+
+    /* Container for shop */
+    .shop-container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    /* Product Card */
+    .product-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      width: 280px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+
+    .product-card h3 {
+      margin-top: 0;
+      color: #27ae60;
+    }
+
+    .product-card p {
+      margin: 5px 0 15px;
+      font-size: 16px;
+    }
+
+    /* Form inside card */
+    .product-card form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-card input[type="text"],
+    .product-card input[type="tel"],
+    .product-card input[type="number"] {
+      padding: 8px;
+      margin: 5px 0 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .product-card input[type="number"] {
+      width: 70px;
+    }
+
+    .product-card button {
+      padding: 10px;
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    .product-card button:hover {
+      background-color: #219150;
+    }
+
+    /* No products message */
+    .no-products {
+      text-align: center;
+      font-size: 18px;
+      margin: 50px 0;
+      color: #555;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .shop-container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .product-card {
+        width: 90%;
+      }
+    }
+    .product-img {
+  width: 100%;
+  height: 180px;      /* Fixed height for uniformity */
+  object-fit: cover;  /* Prevents stretching */
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+  </style>
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+
+  <h1 style="text-align:center; margin-top:30px; color:#27ae60;">Customer Shop</h1>
+
+  <% if (products.length === 0) { %>
+    <p class="no-products">No products available. Ask vendor to add products.</p>
+  <% } %>
+
+  <div class="shop-container">
+    <% products.forEach(function(product) { %>
+
+    <div class="product-card">
+      <h3><%= product.name %></h3>
+      <img src="<%= product.image %>" alt="<%= product.name %>" class="product-img">
+      <p>Price: ₹<%= product.price %></p>
+
+   <form action="/customer/add-to-cart" method="POST">
+  <input type="hidden" name="productId" value="<%= product.id %>">
+  
+  <label for="qty-<%= product.id %>" style="font-size: 12px; color: #666;">Quantity:</label>
+  <input type="number" id="qty-<%= product.id %>" name="quantity" value="1" min="1" required>
+
+  <button type="submit" style="background-color: #f39c12;">Add to Cart</button>
+</form>
+    </div>
+
+    <% }); %>
+  </div>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

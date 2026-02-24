@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Order Success</title>
+  <style>
+    /* General Styles */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    a {
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+    }
+
+    /* Container */
+    .success-container {
+      max-width: 600px;
+      margin: 100px auto;
+      background-color: white;
+      padding: 40px 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      text-align: center;
+      animation: fadeIn 0.8s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Headings */
+    h2 {
+      color: #27ae60;
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+
+    h3 {
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+
+    /* Text */
+    p {
+      font-size: 18px;
+      margin: 10px 0;
+      color: #555;
+    }
+
+    .thank-you {
+      font-size: 20px;
+      margin: 20px 0;
+      font-weight: bold;
+      color: #27ae60;
+    }
+
+    /* Back button */
+    .back-btn {
+      display: inline-block;
+      margin-top: 25px;
+      padding: 12px 25px;
+      background-color: #27ae60;
+      color: white;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background-color: #219150;
+      transform: translateY(-2px);
+    }
+
+    /* Icon */
+    .success-icon {
+      font-size: 60px;
+      color: #27ae60;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="success-container">
+  <div class="success-icon">✅</div>
+  <h2>Order Placed Successfully!</h2>
+  <p class="thank-you">Thank you for shopping with Vendor Go!</p>
+
+ <h3>Order Summary</h3>
+<p>Thank you, <strong><%= order.customerName %></strong>!</p>
+
+<ul>
+  <% order.items.forEach(item => { %>
+    <li>
+      <%= item.name %> (x<%= item.quantity %>) - ₹<%= item.price * item.quantity %>
+    </li>
+  <% }) %>
+</ul>
+
+<p>Total Paid: <strong>₹<%= order.totalPrice %></strong></p>
+  <a href="/" class="back-btn">🏠 Back to Shop</a>
+</div>
+
+</body> 
+</html>

@@ -1,0 +1,154 @@
+/* ===== GLOBAL RESET ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ===== FULL PAGE LAYOUT ===== */
+html, body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* ===== MAIN CONTENT AREA ===== */
+.full {
+  flex: 1;
+  background: linear-gradient(135deg, #e8f5e9, #d0f0d6);
+  padding: 60px 20px;
+
+  display: flex;
+  justify-content: center;   /* horizontal center */
+}
+
+/* Center container */
+.full-inner {
+  width: 100%;
+  max-width: 520px;
+}
+
+/* ===== HEADING ===== */
+h2 {
+  text-align: center;
+  color: #1b5e20;
+  font-size: 28px;
+  margin-bottom: 15px;
+}
+
+/* ===== DESCRIPTION TEXT ===== */
+.full-inner > p {
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 25px;
+}
+
+/* ===== FORM CARD ===== */
+form {
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+  position: relative;
+}
+
+/* Decorative top bar */
+form::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(to right, #1b5e20, #43a047);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
+
+/* ===== INPUTS ===== */
+input,
+textarea {
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  border: 1px solid #c8e6c9;
+  border-radius: 10px;
+  font-size: 14px;
+  background-color: #f9fff9;
+  transition: all 0.3s ease;
+}
+
+input:focus,
+textarea:focus {
+  border-color: #2e7d32;
+  background-color: #ffffff;
+  box-shadow: 0 0 8px rgba(46, 125, 50, 0.25);
+  outline: none;
+}
+
+textarea {
+  resize: none;
+  height: 110px;
+}
+
+/* ===== FILE INPUT ===== */
+input[type="file"] {
+  background-color: #ffffff;
+  padding: 10px;
+}
+
+/* ===== TERMS BOX ===== */
+form div {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+form h4 {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+form ul {
+  padding-left: 18px;
+  font-size: 12px;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+/* ===== BUTTON ===== */
+button {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(to right, #2e7d32, #1b5e20);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(27, 94, 32, 0.3);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  form {
+    padding: 25px;
+  }
+}

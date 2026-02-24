@@ -1,0 +1,137 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Vendor Login</title>
+
+  <style>
+    body {
+      margin: 0;
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+
+      background:
+        linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+        url("/images/vendorlogin.png");
+
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      flex: 1;                 /* pushes footer down */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-box {
+      background: #ffffff;
+      padding: 40px;
+      width: 350px;
+      border-radius: 12px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+      text-align: center;
+    }
+
+    .login-box h2 {
+      margin-bottom: 25px;
+      color: #333;
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 18px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #2a5298;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .login-box button:hover {
+      background: #1e3c72;
+    }
+
+    .error {
+      margin-top: 12px;
+      color: red;
+      font-size: 14px;
+    }
+    /* Make full height layout */
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+/* Body as vertical flex container */
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* This pushes footer to bottom */
+.page-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+  
+  </style>
+</head>
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Vendor Login</title>
+ 
+</head>
+
+<body>
+
+  <%- include("../partials/navbar") %>
+
+  <main class="page-content">
+    <div class="login-box">
+      <!-- your login form -->
+         <!-- Main Content -->
+  <div class="container">
+    <div class="login-box">
+      <h2>Vendor Login</h2>
+
+     <form action="/vendor/login" method="POST">
+  <input type="text" name="username" placeholder="Username" required>
+  <input type="password" name="password" placeholder="Password" required>
+  <button type="submit">Login</button>
+</form>
+
+      <% if (typeof error !== "undefined") { %>
+        <p class="error"><%= error %></p>
+      <% } %>
+    </div>
+  </div>
+
+    </div>
+  </main>
+
+  <%- include("../partials/footer") %>
+
+</body>
+</html>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Orders</title>
+  <style>
+    /* General Styles */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    h2 {
+      text-align: center;
+      margin: 40px 0 20px;
+      color: #27ae60;
+    }
+
+    /* Orders container */
+    .orders-container {
+      max-width: 900px;
+      margin: 0 auto 50px auto;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Order Card */
+    .order-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .order-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+
+    .order-info {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .order-info b {
+      font-size: 18px;
+      color: #27ae60;
+    }
+
+    .order-info span {
+      font-size: 15px;
+      color: #555;
+    }
+
+    .order-status {
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-weight: bold;
+      text-align: center;
+      min-width: 100px;
+      color: white;
+    }
+
+    .status-pending {
+      background-color: #f39c12;
+    }
+
+    .status-completed {
+      background-color: #27ae60;
+    }
+
+    .status-cancelled {
+      background-color: #e74c3c;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .order-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .order-status {
+        margin-top: 10px;
+      }
+    }
+
+    /* No orders message */
+    .no-orders {
+      text-align: center;
+      font-size: 18px;
+      color: #555;
+      margin-top: 50px;
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+
+  <h2>My Orders</h2>
+
+  <% if (orders.length === 0) { %>
+    <p class="no-orders">You have no orders yet.</p>
+  <% } %>
+
+  <div class="orders-container">
+    <% orders.forEach(o => { %>
+      <div class="order-card">
+        <div class="order-info">
+          <small><%= o.date ? o.date.toLocaleString() : 'Recent' %></small>
+          
+          <div style="margin-top: 10px;">
+            <% o.displayItems.forEach(item => { %>
+              <div style="margin-bottom: 5px;">
+                <b><%= item.name %></b> 
+                <span>(x<%= item.quantity %>) — ₹<%= item.price * item.quantity %></span>
+              </div>
+            <% }) %>
+          </div>
+
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+          <p style="margin: 0; font-weight: bold;">Total Paid: ₹<%= o.totalPrice %></p>
+        </div>
+
+        <div class="order-status 
+          <%= (o.status && o.status.toLowerCase() === 'pending') ? 'status-pending' : '' %>
+          <%= (o.status && o.status.toLowerCase() === 'completed') ? 'status-completed' : '' %>
+          <%= (o.status && o.status.toLowerCase() === 'cancelled') ? 'status-cancelled' : '' %>">
+          <%= o.status || 'Pending' %>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

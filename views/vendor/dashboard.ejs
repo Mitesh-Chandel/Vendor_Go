@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Vendor Dashboard</title>
+  <link rel="stylesheet" href="/css/vendordash.css">
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+
+
+  <div class="dash">
+    
+    <div class="dashboard-header">
+      <h2>Vendor Dashboard</h2>
+      <a href="/vendor/add-product" class="add-btn">+ Add Product</a>
+    </div>
+
+    <!-- 🔥 PRODUCTS SECTION -->
+    <h3>Your Products</h3>
+
+    <% if (products.length === 0) { %>
+      <p>No products added yet.</p>
+    <% } %>
+
+    <ul>
+      <% products.forEach(p => { %>
+        <li>
+          <b><%= p.name %></b> — ₹<%= p.price %>
+        </li>
+      <% }) %>
+    </ul>
+
+    <hr>
+
+    <!-- 🔥 NEW ORDER REQUESTS SECTION -->
+    <h3>New Order Requests</h3>
+
+    <% if (!orders || orders.length === 0) { %>
+      <p>No new orders</p>
+    <% } %>
+
+    <% orders && orders.forEach(order => { %>
+      <div class="order-card">
+        <p><strong>Customer:</strong> <%= order.customerName %></p>
+        <p><strong>Phone:</strong> <%= order.customerPhone %></p>
+        <p><strong>Total:</strong> ₹<%= order.totalPrice %></p>
+        <p><strong>Status:</strong> <%= order.status %></p>
+
+        <form action="/vendor/accept/<%= order.id %>" method="POST" style="display:inline;">
+          <button type="submit" class="accept-btn">Accept</button>
+        </form>
+
+        <form action="/vendor/reject/<%= order.id %>" method="POST" style="display:inline;">
+          <button type="submit" class="reject-btn">Reject</button>
+        </form>
+      </div>
+      <hr>
+    <% }) %>
+
+  </div>
+
+ 
+
+</body>
+ <%- include('../partials/footer') %>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Add Product</title>
+  <link rel="stylesheet" href="/css/vendoradd.css">
+</head>
+<body>
+
+  <%- include("../partials/navbar") %>
+
+  <div class="full">
+  <div class="full-inner">
+    <h2>Add Product</h2>
+
+    <p style="font-size:14px; color:#555; margin-bottom:20px;">
+      Fill in the details below to list your product in the marketplace.
+      Make sure the information is accurate and the image is clear.
+    </p>
+
+    <form action="/vendor/add-product" method="POST" enctype="multipart/form-data">
+
+      <input type="text" name="name" placeholder="Product Name" required>
+
+      <input type="number" name="price" placeholder="Price (₹)" required>
+
+      <input type="text" name="category" placeholder="Category (e.g. Vegetables, Fruits)">
+
+      <textarea name="description" placeholder="Short Description (quality, freshness, weight etc.)"></textarea>
+
+      <!-- Image Section -->
+      <div style="margin-bottom:15px;">
+        <label style="font-weight:600; font-size:14px;">
+          Upload Image of Your Product
+        </label>
+        <p style="font-size:12px; color:#777; margin:5px 0;">
+          • Use clear image with good lighting<br>
+          • Only JPG / PNG formats recommended<br>
+          • Avoid blurry or low-quality photos
+        </p>
+        <input type="file" name="image" accept="image/*" required>
+      </div>
+
+      <!-- Terms & Conditions -->
+      <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:15px;">
+        <h4 style="margin-top:0; font-size:14px;">Vendor Terms & Conditions</h4>
+        <ul style="font-size:12px; color:#555; padding-left:18px;">
+          <li>Product information must be accurate and genuine.</li>
+          <li>Images must belong to the vendor and not copied.</li>
+          <li>Price once listed should match delivery price.</li>
+          <li>Vendor is responsible for product quality.</li>
+          <li>Platform reserves the right to remove inappropriate listings.</li>
+        </ul>
+
+        <label style="font-size:12px;">
+          <input type="checkbox" required>
+          I agree to the terms & conditions.
+        </label>
+      </div>
+
+      <button type="submit">Save Product</button>
+
+    </form>
+  </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+
+</body>
+</html>

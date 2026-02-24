@@ -1,0 +1,129 @@
+/* ===== RESET & BASE ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(135deg, #e8f5e9, #f1f8f4);
+  color: #1b5e20;
+  /* This ensures the body takes at least the full screen height */
+  min-height: 100vh; 
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== MAIN CONTAINER ===== */
+.dash {
+  flex: 1; /* This pushes the footer to the bottom */
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* ===== HEADINGS ===== */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+h2 {
+  font-size: 28px;
+  color: #1b5e20;
+}
+
+h3 {
+  font-size: 22px;
+  margin: 20px 0;
+  color: #2e7d32;
+  border-bottom: 2px solid #c8e6c9;
+  padding-bottom: 5px;
+}
+
+/* ===== PRODUCT LIST ===== */
+ul {
+  list-style: none;
+  margin-bottom: 40px;
+}
+
+ul li {
+  background: #ffffff;
+  padding: 18px 20px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  border-left: 6px solid #2e7d32;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  transition: transform 0.2s ease;
+}
+
+ul li:hover {
+  transform: translateX(5px);
+}
+
+/* ===== ORDER CARDS ===== */
+.order-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid #c8e6c9;
+}
+
+.order-card p {
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.order-card strong {
+  color: #2e7d32;
+}
+
+/* ===== BUTTONS ===== */
+.add-btn {
+  background-color: #2e7d32;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.add-btn:hover {
+  background-color: #1b5e20;
+  box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3);
+}
+
+.accept-btn, .reject-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-right: 10px;
+  margin-top: 10px;
+  transition: opacity 0.2s;
+}
+
+.accept-btn { background: #43a047; color: white; }
+.reject-btn { background: #d32f2f; color: white; }
+
+.accept-btn:hover, .reject-btn:hover {
+  opacity: 0.9;
+}
+
+/* Clean up HR */
+hr {
+  border: none;
+  height: 1px;
+  background-color: #c8e6c9;
+  margin: 30px 0;
+}

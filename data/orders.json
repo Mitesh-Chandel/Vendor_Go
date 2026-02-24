@@ -1,0 +1,114 @@
+[
+  {
+    "id": 1771924936670,
+    "customerName": "mitesh",
+    "customerPhone": "1234567890",
+    "items": [
+      {
+        "id": 1,
+        "name": "Tomato",
+        "price": 20,
+        "category": "Vegetable",
+        "vendorId": 1,
+        "image": "/images/tomato.jpg",
+        "quantity": 4
+      },
+      {
+        "id": 5,
+        "name": "Apple",
+        "price": 120,
+        "category": "Fruit",
+        "vendorId": 3,
+        "image": "/images/apple.jpg",
+        "quantity": 1
+      },
+      {
+        "id": 6,
+        "name": "Banana",
+        "price": 50,
+        "category": "Fruit",
+        "vendorId": 3,
+        "image": "/images/banana.jpg",
+        "quantity": 1
+      },
+      {
+        "id": 12,
+        "name": "Dragon fruit",
+        "price": 150,
+        "category": "Fruit",
+        "vendorId": 5,
+        "image": "/images/dragon.jpg",
+        "quantity": 1
+      }
+    ],
+    "totalPrice": 400,
+    "status": "accepted",
+    "date": "2026-02-24T09:22:16.670Z"
+  },
+  {
+    "id": 1771927189086,
+    "customerName": "mitesh",
+    "customerPhone": "1234567890",
+    "items": [
+      {
+        "id": 12,
+        "name": "Dragon fruit",
+        "price": 150,
+        "category": "Fruit",
+        "vendorId": 5,
+        "image": "/images/dragon.jpg",
+        "quantity": 1
+      },
+      {
+        "id": 2,
+        "name": "Potato",
+        "price": 25,
+        "category": "Vegetable",
+        "vendorId": 1,
+        "image": "/images/potato.jpg",
+        "quantity": 1
+      }
+    ],
+    "totalPrice": 175,
+    "status": "rejected",
+    "date": "2026-02-24T09:59:49.086Z"
+  },
+  {
+    "id": 1771927697962,
+    "customerName": "mitesh",
+    "customerPhone": "1234567890",
+    "items": [
+      {
+        "id": 1,
+        "name": "Tomato",
+        "price": 20,
+        "category": "Vegetable",
+        "vendorId": 1,
+        "image": "/images/tomato.jpg",
+        "quantity": 1
+      }
+    ],
+    "totalPrice": 20,
+    "status": "waiting",
+    "date": "2026-02-24T10:08:17.962Z"
+  },
+  {
+    "id": 1771939489879,
+    "customerName": "mitesh",
+    "customerPhone": "1234567890",
+    "items": [
+      {
+        "id": 3,
+        "name": "Onion",
+        "price": 30,
+        "category": "Vegetable",
+        "vendorId": 2,
+        "image": "/images/onion.jpg",
+        "quantity": 4
+      }
+    ],
+    "totalPrice": 120,
+    "status": "waiting",
+    "date": "2026-02-24T13:24:49.879Z"
+  }
+]
