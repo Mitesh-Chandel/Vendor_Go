@@ -1,12 +1,11 @@
-/* ===== GLOBAL RESET ===== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* ===== FULL PAGE LAYOUT ===== */
-html, body {
+html,
+body {
   height: 100%;
 }
 
@@ -14,26 +13,23 @@ body {
   display: flex;
   flex-direction: column;
   margin: 0;
-  font-family: 'Segoe UI', Arial, sans-serif;
+  font-family: "Segoe UI", Arial, sans-serif;
 }
 
-/* ===== MAIN CONTENT AREA ===== */
 .full {
   flex: 1;
   background: linear-gradient(135deg, #e8f5e9, #d0f0d6);
   padding: 60px 20px;
 
   display: flex;
-  justify-content: center;   /* horizontal center */
+  justify-content: center;
 }
 
-/* Center container */
 .full-inner {
   width: 100%;
   max-width: 520px;
 }
 
-/* ===== HEADING ===== */
 h2 {
   text-align: center;
   color: #1b5e20;
@@ -41,7 +37,6 @@ h2 {
   margin-bottom: 15px;
 }
 
-/* ===== DESCRIPTION TEXT ===== */
 .full-inner > p {
   text-align: center;
   font-size: 14px;
@@ -49,7 +44,6 @@ h2 {
   margin-bottom: 25px;
 }
 
-/* ===== FORM CARD ===== */
 form {
   background: #ffffff;
   padding: 40px;
@@ -58,7 +52,6 @@ form {
   position: relative;
 }
 
-/* Decorative top bar */
 form::before {
   content: "";
   position: absolute;
@@ -71,7 +64,6 @@ form::before {
   border-top-right-radius: 16px;
 }
 
-/* ===== INPUTS ===== */
 input,
 textarea {
   width: 100%;
@@ -97,13 +89,11 @@ textarea {
   height: 110px;
 }
 
-/* ===== FILE INPUT ===== */
 input[type="file"] {
   background-color: #ffffff;
   padding: 10px;
 }
 
-/* ===== TERMS BOX ===== */
 form div {
   background: #f9f9f9;
   padding: 15px;
@@ -123,7 +113,6 @@ form ul {
   margin-bottom: 10px;
 }
 
-/* ===== BUTTON ===== */
 button {
   width: 100%;
   padding: 14px;
@@ -146,9 +135,11 @@ button:active {
   transform: scale(0.98);
 }
 
-/* ===== RESPONSIVE ===== */
 @media (max-width: 600px) {
   form {
     padding: 25px;
   }
+}
+.end {
+   margin-bottom: 0%;
 }

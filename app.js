@@ -2,14 +2,14 @@ import express from "express";
 import session from "express-session";
 
 import { products } from "./data/db.js";
-
+ 
 
 import vendorRoutes from "./routes/vendor.js";
 import customerRoutes from "./routes/customer.js";
 import adminRoutes from "./routes/admin.js";
 
 const app = express();
-app.use(express.static("public"));
+app.use(express.static("public")); 
 
 
 
@@ -20,9 +20,9 @@ app.use(
     secret: "vendor-go-secret",
     resave: false,
     saveUninitialized: true, 
-  }),
+  }), 
 );
-
+ 
 app.use((req, res, next) => {
   const cart = req.session.cart || [];
   res.locals.cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);

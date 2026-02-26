@@ -7,7 +7,7 @@
     --dark: #0f172a;
     --text-main: #334155;
     --text-muted: #64748b;
-    /* Changed from white to a soft, professional slate tint */
+ 
     --bg-body: #f1f5f9; 
     --card-bg: #ffffff;
     --border-soft: #e2e8f0;
@@ -16,23 +16,23 @@
   body {
   font-family: 'Inter', -apple-system, sans-serif;
   margin: 0;
-  /* A warm, organic cream/linen color */
+ 
   background-color: #fdfaf5; 
   
-  /* Subtle cross-hatch pattern that looks like fabric/burlap */
+ 
   background-image: 
     linear-gradient(90deg, rgba(210, 180, 140, 0.05) 1px, transparent 1px),
     linear-gradient(rgba(210, 180, 140, 0.05) 1px, transparent 1px);
   background-size: 40px 40px;
   
-  color: #2c3e50; /* Deep navy/charcoal for high readability */
+  color: #2c3e50;
 }
 
-  /* --- Hero Section with Mesh Gradient --- */
+ 
   .hero {
     padding: 120px 20px;
     position: relative;
-    /* Soft green glow at the top so it's not just a flat block */
+  
     background: radial-gradient(circle at top right, #dcfce7 0%, transparent 40%),
                 radial-gradient(circle at top left, #f1f5f9 0%, transparent 30%),
                 white;
@@ -64,7 +64,7 @@
   text-align: center;
   color: white;
 
-  background-color: #fdf6ec ; /* Main green */
+  background-color: #fdf6ec ; 
 
   border-bottom: 1px solid #1f8a4d;
 }
@@ -73,7 +73,7 @@
 .hero p {
   color: white;
 }
-/* Add a floating "blob" for extra depth */
+
 .hero::after {
   content: "";
   position: absolute;
@@ -87,7 +87,7 @@
   z-index: 0;
 }
 
-  /* --- Cards and Containers --- */
+ 
   .container {
     max-width: 1140px;
     margin: 0 auto;
@@ -100,7 +100,7 @@
     border-radius: 20px;
     border: 1px solid var(--border-soft);
     text-align: center;
-    /* Soft shadow to make it lift off the gray background */
+   
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     transition: transform 0.3s ease;
   }
@@ -116,7 +116,7 @@
     gap: 30px;
   }
 
-  /* --- Accent Section (Dark) --- */
+
   .accent-section {
     background-color: var(--dark);
     color: white;
@@ -160,7 +160,7 @@
   }
 
   .hero {
-  color: #1e293b; /* Dark text */
+  color: #1e293b;
 }
 
 .hero h1 {
@@ -176,7 +176,7 @@
 }
 
 .highlight {
-  color: #14532d; /* Brand green */
+  color: #14532d; 
 }
 
 .btn-primary {

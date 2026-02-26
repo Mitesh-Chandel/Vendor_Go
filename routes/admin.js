@@ -6,7 +6,6 @@ import { products } from "../data/products.js";
 
 const router = express.Router();
 
-// ================= LOGIN ROUTES =================
 router.get("/login", (req, res) => {
   res.render("admin/login");
 });
@@ -21,58 +20,52 @@ router.post("/login", (req, res) => {
   }
 });
 
-// ================= DASHBOARD (Protected) =================
 router.get("/", (req, res) => {
   if (!req.session.isAdmin) {
     return res.redirect("/admin/login");
   }
 
-  // 🔥 READ ORDERS FROM JSON
   const orders = getOrders();
 
-  // Format orders
-  const formattedOrders = orders.map(order => {
+  const formattedOrders = orders.map((order) => {
     let displayItems = [];
 
     if (order.items && Array.isArray(order.items)) {
       displayItems = order.items;
     } else if (order.productId) {
-      const product = products.find(p => p.id === order.productId);
-      displayItems = [{
-        name: product ? product.name : "Unknown Product",
-        quantity: order.quantity || 1
-      }];
+      const product = products.find((p) => p.id === order.productId);
+      displayItems = [
+        {
+          name: product ? product.name : "Unknown Product",
+          quantity: order.quantity || 1,
+        },
+      ];
     }
 
     return {
       ...order,
-      displayItems
+      displayItems,
     };
   });
 
-  // 🔥 Recalculate everything from JSON orders
-  const totalEarnings = orders.reduce(
-    (sum, o) => sum + (o.totalPrice || 0),
-    0
-  );
+  const totalEarnings = orders.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
 
   const stats = {
     totalVendors: vendors.length,
     totalProducts: products.length,
     totalOrders: orders.length,
-    totalRevenue: totalEarnings
+    totalRevenue: totalEarnings,
   };
 
   res.render("admin/dashboard", {
     orders: formattedOrders,
-    stats: stats
+    stats: stats,
   });
 });
 
-// ================= VENDOR MANAGEMENT =================
 router.post("/approve-vendor/:id", (req, res) => {
   const vendorId = parseInt(req.params.id);
-  const vendor = vendors.find(v => v.id === vendorId);
+  const vendor = vendors.find((v) => v.id === vendorId);
 
   if (vendor) {
     vendor.approved = true;
