@@ -55,3 +55,11 @@ app.get("/", (req, res) => {
 app.listen(3000, () => {
   console.log("🚀 Vendor Go running on port 3000");
 });
+
+   // verified 
+   //otp 
+  //  admin shold see vendor list 
+  //rating
+  //random data
+  //paymet methods add
+  

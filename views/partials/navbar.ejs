@@ -1,54 +1,89 @@
 <style>
-  nav {
-    background-color: #2c3e50;
-    padding: 12px 20px;
- 
-    display: flex;
-    align-items: center;
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
   }
 
+  nav {
+    background: linear-gradient(135deg, #2c3e50, #1a252f);
+    padding: 14px 40px;
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  }
+
+  .logo {
+    color: #f1c40f;
+    font-size: 22px;
+    font-weight: bold;
+    margin-right: 40px;
+  }
 
   .nav-links {
     display: flex;
-    gap: 10px;
+    gap: 25px;
   }
 
   nav a {
     color: white;
     text-decoration: none;
-    font-weight: bold;
-    transition: color 0.3s ease;
+    font-weight: 500;
+    transition: all 0.3s ease;
   }
 
   nav a:hover {
     color: #f1c40f;
+    transform: translateY(-2px);
   }
 
-
   .cart-link {
-    margin-left: auto; 
+    margin-left: auto;
     background-color: #27ae60;
-    padding: 8px 15px;
-    border-radius: 20px;
+    padding: 8px 18px;
+    border-radius: 25px;
+    transition: all 0.3s ease;
   }
 
   .cart-link:hover {
     background-color: #219150;
-    color: white;
+    transform: scale(1.05);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    nav {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+    }
+
+    .nav-links {
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .cart-link {
+      align-self: flex-end;
+    }
   }
 </style>
 
 <nav>
+
+
   <div class="nav-links">
     <a href="/">Home</a>
     <a href="/customer/shop">Shop</a>
     <a href="/customer/orders">Orders</a>
     <a href="/vendor/login">Vendor</a>
-    <a href="/admin"> Admin</a>
+    <a href="/admin">Admin</a>
   </div>
 
   <a href="/customer/cart" class="cart-link">
     🛒 Cart (<%= cartCount %>)
   </a>
 </nav>
-<hr>
