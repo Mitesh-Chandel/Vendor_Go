@@ -1,142 +1,24 @@
-export const vendors = [
-  {
-    id: 1,
-    username: "vendor1",
-    password: "pass123",
-    shopName: "Fresh Mart",
-    approved: true,
-  },
-  {
-    id: 2,
-    username: "vendor2",
-    password: "pass123",
-    shopName: "Green Veggies",
-    approved: true,
-  },
-  {
-    id: 3,
-    username: "vendor3",
-    password: "pass123",
-    shopName: "Daily Needs",
-    approved: true,
-  },
-  {
-    id: 4,
-    username: "vendor4",
-    password: "pass123",
-    shopName: "Fruit Zone",
-    approved: true,
-  },
-  {
-    id: 5,
-    username: "vendor5",
-    password: "pass123",
-    shopName: "Local Basket",
-    approved: true,
-  },
-  {
-    id: 6,
-    username: "vendor6",
-    password: "pass123",
-    shopName: "Veg Corner",
-    approved: true,
-  },
-  {
-    id: 7,
-    username: "vendor7",
-    password: "pass123",
-    shopName: "Farm Fresh",
-    approved: true,
-  },
-  {
-    id: 8,
-    username: "vendor8",
-    password: "pass123",
-    shopName: "City Mart",
-    approved: true,
-  },
-  {
-    id: 9,
-    username: "vendor9",
-    password: "pass123",
-    shopName: "Quick Grocer",
-    approved: true,
-  },
-  {
-    id: 10,
-    username: "vendor10",
-    password: "pass123",
-    shopName: "Street Fresh",
-    approved: true,
-  },
-  {
-    id: 11,
-    username: "vendor11",
-    password: "pass123",
-    shopName: "Organic Hub",
-    approved: true,
-  },
-  {
-    id: 12,
-    username: "vendor12",
-    password: "pass123",
-    shopName: "Fresh Basket",
-    approved: true,
-  },
-  {
-    id: 13,
-    username: "vendor13",
-    password: "pass123",
-    shopName: "Veggie World",
-    approved: true,
-  },
-  {
-    id: 14,
-    username: "vendor14",
-    password: "pass123",
-    shopName: "Daily Fresh",
-    approved: true,
-  },
-  {
-    id: 15,
-    username: "vendor15",
-    password: "pass123",
-    shopName: "Healthy Mart",
-    approved: true,
-  },
-  {
-    id: 16,
-    username: "vendor16",
-    password: "pass123",
-    shopName: "Market Point",
-    approved: true,
-  },
-  {
-    id: 17,
-    username: "vendor17",
-    password: "pass123",
-    shopName: "Farm Basket",
-    approved: true,
-  },
-  {
-    id: 18,
-    username: "vendor18",
-    password: "pass123",
-    shopName: "Nature Fresh",
-    approved: true,
-  },
-  {
-    id: 19,
-    username: "vendor19",
-    password: "pass123",
-    shopName: "Urban Grocer",
-    approved: true,
-  },
-  {
-    id: 20,
-    username: "vendor20",
-    password: "pass123",
-    shopName: "Daily Veg",
-    approved: true,
-  },
-];
+import db from "./db.js";
+
+export async function getVendors() {
+  const result = await db.query("SELECT * FROM vendors");
+  return result.rows;
+}
+
+export async function getVendorById(id) {
+  const result = await db.query("SELECT * FROM vendors WHERE id = $1", [id]);
+  return result.rows[0];
+}
+
+export async function getVendorByUsername(username) {
+  const result = await db.query("SELECT * FROM vendors WHERE username = $1", [username]);
+  return result.rows[0];
+}
+
+export async function addVendor(username, password, email) {
+  const result = await db.query(
+    "INSERT INTO vendors (username, password, email) VALUES ($1, $2, $3) RETURNING *",
+    [username, password, email]
+  );
+  return result.rows[0];
+}

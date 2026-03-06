@@ -1,8 +1,6 @@
 import express from "express";
-
-import { getOrders } from "../data/orders.js";
-import { vendors } from "../data/vendors.js";
-import { products } from "../data/products.js";
+import { getVendors } from "../data/vendors.js";
+import db from "../data/db.js";
 
 const router = express.Router();
 
@@ -20,59 +18,100 @@ router.post("/login", (req, res) => {
   }
 });
 
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
   if (!req.session.isAdmin) {
     return res.redirect("/admin/login");
   }
 
-  const orders = getOrders();
+  try {
+    // Fetch vendors
+    const vendors = await getVendors();
 
-  const formattedOrders = orders.map((order) => {
-    let displayItems = [];
+    // Fetch orders with order items and products details
+    const ordersResult = await db.query(`
+      SELECT 
+        o.id,
+        o.customer_name,
+        o.customer_email,
+        o.customer_phone,
+        o.total_price,
+        o.status,
+        o.date,
+        oi.order_id,
+        oi.product_id,
+        oi.quantity,
+        oi.price,
+        p.name as product_name
+      FROM orders o
+      LEFT JOIN order_items oi ON o.id = oi.order_id
+      LEFT JOIN products p ON oi.product_id = p.id
+      ORDER BY o.id DESC
+    `);
 
-    if (order.items && Array.isArray(order.items)) {
-      displayItems = order.items;
-    } else if (order.productId) {
-      const product = products.find((p) => p.id === order.productId);
-      displayItems = [
-        {
-          name: product ? product.name : "Unknown Product",
-          quantity: order.quantity || 1,
-        },
-      ];
-    }
+    // Group orders by order ID
+    const ordersMap = {};
+    ordersResult.rows.forEach(row => {
+      if (!ordersMap[row.id]) {
+        ordersMap[row.id] = {
+          id: row.id,
+          customerName: row.customer_name,
+          customerEmail: row.customer_email,
+          customerPhone: row.customer_phone,
+          totalPrice: row.total_price,
+          status: row.status,
+          date: row.date,
+          items: []
+        };
+      }
+      
+      if (row.product_id) {
+        ordersMap[row.id].items.push({
+          productId: row.product_id,
+          productName: row.product_name,
+          quantity: row.quantity,
+          price: row.price
+        });
+      }
+    });
 
-    return {
-      ...order,
-      displayItems,
+    const formattedOrders = Object.values(ordersMap);
+    const totalEarnings = formattedOrders.reduce((sum, o) => sum + (parseFloat(o.totalPrice) || 0), 0);
+
+    const vendorCount = await db.query("SELECT COUNT(*) FROM vendors");
+    const productCount = await db.query("SELECT COUNT(*) FROM products");
+
+    const stats = {
+      totalVendors: parseInt(vendorCount.rows[0].count),
+      totalProducts: parseInt(productCount.rows[0].count),
+      totalOrders: formattedOrders.length,
+      totalRevenue: totalEarnings,
     };
-  });
 
-  const totalEarnings = orders.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
-
-  const stats = {
-    totalVendors: vendors.length,
-    totalProducts: products.length,
-    totalOrders: orders.length,
-    totalRevenue: totalEarnings,
-  };
-
-  res.render("admin/dashboard", {
-    orders: formattedOrders,
-    stats: stats,
-  });
+    res.render("admin/dashboard", {
+      orders: formattedOrders,
+      stats: stats,
+      vendors: vendors,
+    });
+  } catch (error) {
+    console.error("Admin dashboard error:", error);
+    res.render("admin/dashboard", {
+      orders: [],
+      stats: { totalVendors: 0, totalProducts: 0, totalOrders: 0, totalRevenue: 0 },
+      vendors: [],
+      error: error.message
+    });
+  }
 });
 
-router.post("/approve-vendor/:id", (req, res) => {
+router.post("/approve-vendor/:id", async (req, res) => {
   const vendorId = parseInt(req.params.id);
-  const vendor = vendors.find((v) => v.id === vendorId);
 
-  if (vendor) {
-    vendor.approved = true;
-    res.json({ success: true });
-  } else {
-    res.json({ success: false });
-  }
+  await db.query(
+    "UPDATE vendors SET approved = true WHERE id = $1",
+    [vendorId]
+  );
+
+  res.json({ success: true });
 });
 
 export default router;

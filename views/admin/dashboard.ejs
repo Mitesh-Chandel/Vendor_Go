@@ -135,6 +135,58 @@
       background-color: #e74c3c;
     }
 
+    /* Vendors Section */
+    .vendors-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .vendor-card {
+      background: white;
+      border-left: 5px solid #3498db;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .vendor-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .vendor-info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .vendor-info span {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .vendor-username {
+      font-weight: bold;
+      font-size: 16px;
+      color: #2c3e50;
+    }
+
+    .vendor-status {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 15px;
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+      background-color: #27ae60;
+    }
+
+    .vendor-status.unverified {
+      background-color: #f39c12;
+    }
     
     @media (max-width: 768px) {
       .stats-container {
@@ -185,34 +237,70 @@
 </div>
 
     <hr>
-    <h3>Orders</h3>
-    <div class="orders-container">
-  <% orders.forEach(o => { %>
-    <div class="order-card">
-      <div class="order-info">
-        <span><strong>Customer:</strong> <%= o.customerName %></span>
-        
-        <span><strong>Products:</strong> 
-          <% o.displayItems.forEach((item, index) => { %>
-            <%= item.name %> (x<%= item.quantity %>)<%= index < o.displayItems.length - 1 ? ',' : '' %>
-          <% }) %>
-        </span>
-        
-        <span><strong>Total:</strong> ₹<%= o.totalPrice %></span>
+    <h3>📋 Vendors List</h3>
+    <% if (vendors && vendors.length > 0) { %>
+      <div class="vendors-container">
+        <% vendors.forEach(vendor => { %>
+          <div class="vendor-card">
+            <div class="vendor-info">
+              <span class="vendor-username">👤 <%= vendor.username %></span>
+              <span><strong>Email:</strong> <%= vendor.email %></span>
+              <span><strong>ID:</strong> #<%= vendor.id %></span>
+              <span><strong>Status:</strong> 
+                <span class="vendor-status <%= vendor.verified ? '' : 'unverified' %>">
+                  <%= vendor.verified ? '✓ Verified' : '⚠ Unverified' %>
+                </span>
+              </span>
+              <% if (vendor.created_at) { %>
+                <span><strong>Joined:</strong> <%= new Date(vendor.created_at).toLocaleDateString() %></span>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
       </div>
-      
-      
+    <% } else { %>
+      <p style="color: #999;">No vendors found</p>
+    <% } %>
 
-        <div class="order-status 
-  <%= (o.status && o.status.toLowerCase() === 'waiting') ? 'status-pending' : '' %>
-  <%= (o.status && o.status.toLowerCase() === 'accepted') ? 'status-completed' : '' %>
-  <%= (o.status && o.status.toLowerCase() === 'rejected') ? 'status-cancelled' : '' %>">
-  <%= o.status %>
-</div>
-     
-    </div>
-  <% }) %>
-</div>
+    <hr>
+    <h3>📦 Orders</h3>
+    <% if (orders && orders.length > 0) { %>
+      <div class="orders-container">
+        <% orders.forEach(o => { %>
+          <div class="order-card">
+            <div class="order-info">
+              <span style="font-weight: bold; font-size: 16px;">Order #<%= o.id %></span>
+              <span><strong>Customer:</strong> <%= o.customerName %></span>
+              <span><strong>Email:</strong> <%= o.customerEmail %></span>
+              <span><strong>Phone:</strong> <%= o.customerPhone %></span>
+              
+              <span style="margin-top: 8px; font-weight: bold;">📋 Order Items:</span>
+              <% if (o.items && o.items.length > 0) { %>
+                <ul style="margin: 8px 0 0 20px; color: #555;">
+                  <% o.items.forEach(item => { %>
+                    <li><%= item.productName %> (Qty: <%= item.quantity %>) - ₹<%= parseFloat(item.price).toFixed(2) %></li>
+                  <% }) %>
+                </ul>
+              <% } else { %>
+                <span style="color: #999;">No items</span>
+              <% } %>
+              
+              <span style="margin-top: 8px;"><strong>Total:</strong> ₹<%= parseFloat(o.totalPrice).toFixed(2) %></span>
+              <span><strong>Date:</strong> <%= o.date ? new Date(o.date).toLocaleDateString() : 'N/A' %></span>
+            </div>
+            
+            <div class="order-status 
+              <%= (o.status && o.status.toLowerCase() === 'waiting') ? 'status-pending' : '' %>
+              <%= (o.status && o.status.toLowerCase() === 'accepted') ? 'status-completed' : '' %>
+              <%= (o.status && o.status.toLowerCase() === 'rejected') ? 'status-cancelled' : '' %>">
+              <%= o.status %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p style="color: #999;">No orders found</p>
+    <% } %>
 </div>
 
 </body>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Verify Order - OTP</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .otp-container {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+      padding: 40px;
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .otp-icon {
+      font-size: 60px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      color: #7f8c8d;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .email-info {
+      background: #ecf0f1;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      color: #34495e;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #34495e;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid #ecf0f1;
+      border-radius: 8px;
+      font-size: 18px;
+      letter-spacing: 3px;
+      text-align: center;
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .error {
+      color: #e74c3c;
+      background: #fadbd8;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: <%= typeof error !== 'undefined' && error ? 'block' : 'none' %>;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      margin-top: 15px;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .timer {
+      color: #e74c3c;
+      font-size: 14px;
+      margin-top: 15px;
+      font-weight: 600;
+    }
+
+    .timer.warning {
+      color: #e67e22;
+    }
+
+    .timer.expired {
+      color: #c0392b;
+    }
+
+    .resend {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #7f8c8d;
+    }
+
+    .resend a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .resend a:hover {
+      text-decoration: underline;
+    }
+
+    .info-box {
+      background: #d5f4e6;
+      color: #27ae60;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      border-left: 4px solid #27ae60;
+    }
+  </style>
+</head>
+<body>
+  <div class="otp-container">
+    <div class="otp-icon">🔐</div>
+    <h1>Verify Your Order</h1>
+    <p class="subtitle">Enter the 6-digit code sent to your email</p>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="error"><%= error %></div>
+    <% } %>
+
+    <div class="email-info">
+      📧 Code sent to <strong><%= customerEmail %></strong>
+    </div>
+
+    <div class="info-box">
+      ✓ Order ID: #<%= orderId %>
+    </div>
+
+    <form action="/customer/verify-otp" method="POST">
+      <div class="form-group">
+        <label for="otp">Enter OTP Code</label>
+        <input 
+          type="text" 
+          id="otp" 
+          name="otp" 
+          placeholder="000000" 
+          maxlength="6" 
+          pattern="[0-9]{6}"
+          required
+          autofocus
+        >
+      </div>
+
+      <button type="submit" id="submitBtn">✓ Verify OTP</button>
+    </form>
+
+    <div class="timer" id="timer">
+      ⏱️ Code expires in 10:00
+    </div>
+
+    <div class="resend">
+      Didn't receive the code? <a href="/customer/shop">Place order again</a>
+    </div>
+  </div>
+
+  <script>
+    // Countdown Timer - 10 minutes
+    let timeLeft = 10 * 60; // 10 minutes in seconds
+
+    function updateTimer() {
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      const timeString = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+      
+      const timerElement = document.getElementById('timer');
+      const submitBtn = document.getElementById('submitBtn');
+
+      // Update timer display
+      timerElement.textContent = `⏱️ Code expires in ${timeString}`;
+
+      // Change color based on time left
+      if (timeLeft > 300) { // More than 5 minutes
+        timerElement.classList.remove('warning', 'expired');
+      } else if (timeLeft > 60) { // Less than 5 minutes
+        timerElement.classList.remove('expired');
+        timerElement.classList.add('warning');
+      } else if (timeLeft > 0) { // Less than 1 minute
+        timerElement.classList.add('expired');
+      }
+
+      // OTP expired
+      if (timeLeft <= 0) {
+        timerElement.textContent = '❌ Code has expired. Please place order again.';
+        timerElement.classList.add('expired');
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.5';
+        submitBtn.style.cursor = 'not-allowed';
+        clearInterval(timerInterval);
+        return;
+      }
+
+      timeLeft--;
+    }
+
+    // Run timer immediately
+    updateTimer();
+
+    // Update timer every second
+    const timerInterval = setInterval(updateTimer, 1000);
+
+    // Auto-format OTP input - only allow numbers
+    document.getElementById('otp').addEventListener('input', function(e) {
+      this.value = this.value.replace(/[^0-9]/g, '');
+      if (this.value.length === 6) {
+        // Optional: Auto-submit when 6 digits entered
+        // this.form.submit();
+      }
+    });
+
+    // Disable submit button if OTP expires
+    document.getElementById('submitBtn').addEventListener('click', function(e) {
+      if (timeLeft <= 0) {
+        e.preventDefault();
+        alert('OTP has expired. Please place order again.');
+      }
+    });
+  </script>
+</body>
+</html>

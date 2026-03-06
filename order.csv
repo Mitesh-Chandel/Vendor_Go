@@ -1,0 +1,4 @@
+id,customer_name,customer_phone,customer_email,total_price,status,date
+1001,Mitesh,9876543210,mitesh@gmail.com,370,waiting,2026-03-03
+1002,Rahul,9123456780,rahul@gmail.com,250,accepted,2026-03-02
+1003,Priya,9988776655,priya@gmail.com,120,rejected,2026-03-01

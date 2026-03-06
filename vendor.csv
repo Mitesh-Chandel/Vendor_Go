@@ -1,0 +1,4 @@
+id,username,password,email,verified,created_at
+1,vendor1,1234,vendor1@gmail.com,true,2026-03-01
+2,vendor2,1234,vendor2@gmail.com,false,2026-03-02
+3,vendor3,1234,vendor3@gmail.com,true,2026-03-03

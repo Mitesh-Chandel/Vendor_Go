@@ -1,98 +1,22 @@
-export const products = [
-  {
-    id: 1,
-    name: "Tomato",
-    price: 20,
-    category: "Vegetable",
-    vendorId: 1,
-    image: "/images/tomato.jpg",
-  },
-  {
-    id: 2,
-    name: "Potato",
-    price: 25,
-    category: "Vegetable",
-    vendorId: 1,
-    image: "/images/potato.jpg",
-  },
-  {
-    id: 3,
-    name: "Onion",
-    price: 30,
-    category: "Vegetable",
-    vendorId: 2,
-    image: "/images/onion.jpg",
-  },
-  {
-    id: 4,
-    name: "Carrot",
-    price: 40,
-    category: "Vegetable",
-    vendorId: 2,
-    image: "/images/carrot.jpg",
-  },
-  {
-    id: 5,
-    name: "Apple",
-    price: 120,
-    category: "Fruit",
-    vendorId: 3,
-    image: "/images/apple.jpg",
-  },
-  {
-    id: 6,
-    name: "Banana",
-    price: 50,
-    category: "Fruit",
-    vendorId: 3,
-    image: "/images/banana.jpg",
-  },
-  {
-    id: 7,
-    name: "Orange",
-    price: 80,
-    category: "Fruit",
-    vendorId: 4,
-    image: "/images/orange.jpg",
-  },
-  {
-    id: 8,
-    name: "Mango",
-    price: 150,
-    category: "Fruit",
-    vendorId: 4,
-    image: "/images/mango.jpg",
-  },
-  {
-    id: 9,
-    name: "Spinach",
-    price: 15,
-    category: "Leafy",
-    vendorId: 5,
-    image: "/images/spinach.jpg",
-  },
-  {
-    id: 10,
-    name: "Cabbage",
-    price: 35,
-    category: "Vegetable",
-    vendorId: 5,
-    image: "/images/cabbage.jpg",
-  },
-  {
-    id: 11,
-    name: "Lemon",
-    price: 15,
-    category: "Fruit",
-    vendorId: 5,
-    image: "/images/lemon.jpg",
-  },
-  {
-    id: 12,
-    name: "Dragon fruit",
-    price: 150,
-    category: "Fruit",
-    vendorId: 5,
-    image: "/images/dragon.jpg",
-  },
-];
+import db from "./db.js";
+
+export async function getProducts() {
+  const result = await db.query("SELECT * FROM products");
+  return result.rows;
+}
+
+export async function getProductsByVendor(vendorId) {
+  const result = await db.query(
+    "SELECT * FROM products WHERE vendor_id = $1",
+    [vendorId]
+  );
+  return result.rows;
+}
+
+export async function addProduct(name, price, description, category, image, vendorId) {
+  const result = await db.query(
+    "INSERT INTO products (name, price, description, category, image, vendor_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+    [name, price, description, category, image, vendorId]
+  );
+  return result.rows[0];
+}

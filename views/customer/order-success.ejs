@@ -92,18 +92,28 @@
   <h2>Order Placed Successfully!</h2>
   <p class="thank-you">Thank you for shopping with Vendor Go!</p>
 
- <h3>Order Summary</h3>
-<p>Thank you, <strong><%= order.customerName %></strong>!</p>
+  <h3>Order Summary</h3>
+  <p>Order ID: <strong><%= order.id %></strong></p>
+  <p>Thank you, <strong><%= order.customerName || 'Customer' %></strong>!</p>
+  <p>Email: <strong><%= order.customerEmail %></strong></p>
+  <p>Phone: <strong><%= order.customerPhone %></strong></p>
 
-<ul>
-  <% order.items.forEach(item => { %>
-    <li>
-      <%= item.name %> (x<%= item.quantity %>) - ₹<%= item.price * item.quantity %>
-    </li>
-  <% }) %>
-</ul>
+  <h4>Items Ordered:</h4>
+  <% if (order.items && order.items.length > 0) { %>
+    <ul>
+      <% order.items.forEach(item => { %>
+        <li>
+          <%= item.name %> (Qty: <%= item.quantity %>) - ₹<%= item.price * item.quantity %>
+        </li>
+      <% }) %>
+    </ul>
+  <% } else { %>
+    <p>No items in this order</p>
+  <% } %>
 
-<p>Total Paid: <strong>₹<%= order.totalPrice %></strong></p>
+  <p style="font-size: 20px; color: #27ae60;"><strong>Total Paid: ₹<%= order.totalPrice %></strong></p>
+  <p>Status: <strong style="color: #f39c12;"><%= order.status %></strong></p>
+  
   <a href="/" class="back-btn">🏠 Back to Shop</a>
 </div>
 
