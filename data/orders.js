@@ -33,3 +33,24 @@ export async function addOrderItem(orderId, productId, quantity) {
   );
   return result.rows[0];
 }
+
+export async function getOrdersByVendor(vendorId) {
+  const result = await db.query(`
+    SELECT 
+      o.id,
+      o.customer_name,
+      o.customer_phone,
+      o.customer_email,
+      o.total_price,
+      o.status,
+      p.name AS product_name,
+      oi.quantity
+    FROM orders o
+    JOIN order_items oi ON oi.order_id = o.id
+    JOIN products p ON p.id = oi.product_id
+    WHERE p.vendor_id = $1
+    ORDER BY o.id DESC
+  `, [vendorId]);
+
+  return result.rows;
+}

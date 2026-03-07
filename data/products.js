@@ -1,7 +1,21 @@
 import db from "./db.js";
 
 export async function getProducts() {
-  const result = await db.query("SELECT * FROM products");
+  const result = await db.query(`
+    SELECT 
+      products.id,
+      products.name,
+      products.price,
+      products.description,
+      products.category,
+      products.image,
+      products.vendor_id,
+      vendors.username as vendor_name,
+      vendors.email as vendor_email
+    FROM products
+    LEFT JOIN vendors ON products.vendor_id = vendors.id
+    ORDER BY products.id DESC
+  `);
   return result.rows;
 }
 
@@ -11,6 +25,25 @@ export async function getProductsByVendor(vendorId) {
     [vendorId]
   );
   return result.rows;
+}
+
+export async function getProductById(productId) {
+  const result = await db.query(`
+    SELECT 
+      products.id,
+      products.name,
+      products.price,
+      products.description,
+      products.category,
+      products.image,
+      products.vendor_id,
+      vendors.username as vendor_name,
+      vendors.email as vendor_email
+    FROM products
+    LEFT JOIN vendors ON products.vendor_id = vendors.id
+    WHERE products.id = $1
+  `, [productId]);
+  return result.rows[0];
 }
 
 export async function addProduct(name, price, description, category, image, vendorId) {

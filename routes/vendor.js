@@ -6,10 +6,12 @@ import { getOrders, updateOrderStatus } from "../data/orders.js";
 import multer from "multer";
 import path from "path";
 import nodemailer from "nodemailer";
+  import { getOrdersByVendor } from "../data/orders.js";
 
 dotenv.config();
 
 const router = express.Router();
+
 
 /* ================================
    📧 EMAIL CONFIGURATION
@@ -23,7 +25,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-/* ================================
+/* ================================ 
    🔐 LOGIN
 ================================ */
 
@@ -47,7 +49,6 @@ router.post("/login", async (req, res) => {
       });
     }
   } catch (error) {
-    console.error("Login error:", error);
     res.render("vendor/login", { error: "Server error" });
   }
 });
@@ -56,30 +57,56 @@ router.post("/login", async (req, res) => {
    📊 DASHBOARD
 ================================ */
 
+// router.get("/dashboard", async (req, res) => {
+//   try {
+//     const vendorId = req.session.vendorId || 1;
+
+//     const vendorProducts = await getProductsByVendor(vendorId);
+//     const orders = await getOrdersByVendor(vendorId);
+
+//     const waitingOrders = orders.filter((o) => o.status === "waiting");
+
+//     res.render("vendor/dashboard", {
+//       products: vendorProducts,
+//       orders: waitingOrders,
+//     });
+
+//   } catch (error) {
+//     res.render("vendor/dashboard", { products: [], orders: [] });
+//   }
+// });
+
+
 router.get("/dashboard", async (req, res) => {
   try {
-    const vendorId = req.session.vendorId || 1;  // Default to vendor 1 for now
+    const vendorId = req.session.vendorId || 1;
+
     const vendorProducts = await getProductsByVendor(vendorId);
-    const orders = await getOrders();
+    const orders = await getOrdersByVendor(vendorId);
+   
+console.log("ORDERS:", orders);
+
+    console.log("Orders:", orders);   // 👈 add this
+
     const waitingOrders = orders.filter((o) => o.status === "waiting");
 
     res.render("vendor/dashboard", {
       products: vendorProducts,
       orders: waitingOrders,
     });
+
   } catch (error) {
-    console.error("Dashboard error:", error);
+    console.log(error);
     res.render("vendor/dashboard", { products: [], orders: [] });
   }
 });
-
 /* ================================
    📦 PRODUCT IMAGE UPLOAD
 ================================ */
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "public/images/uploads/");
+    cb(null, "public/uploads/");
   },
   filename: function (req, file, cb) {
     const uniqueName = Date.now() + path.extname(file.originalname);
@@ -102,14 +129,14 @@ router.post("/add-product", upload.single("image"), async (req, res) => {
 
   try {
     const vendorId = req.session.vendorId || 1;
-    const imagePath = "/images/uploads/" + req.file.filename;
+    const imagePath = "/uploads/" + req.file.filename;
 
     await addProduct(name, parseFloat(price), description, category, imagePath, vendorId);
     res.redirect("/vendor/dashboard");
   } catch (error) {
-    console.error("Add product error:", error);
-    res.send("Error adding product");
-  }
+  console.log(error);   // shows error in terminal
+  res.send("Error adding product");
+}
 });
 
 /* ================================
@@ -136,7 +163,6 @@ router.post("/accept/:id", async (req, res) => {
 
     res.redirect("/vendor/dashboard");
   } catch (error) {
-    console.error("Accept order error:", error);
     res.redirect("/vendor/dashboard");
   }
 });
@@ -164,7 +190,6 @@ router.post("/reject/:id", async (req, res) => {
 
     res.redirect("/vendor/dashboard");
   } catch (error) {
-    console.error("Reject order error:", error);
     res.redirect("/vendor/dashboard");
   }
 });

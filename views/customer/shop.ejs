@@ -39,6 +39,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      cursor: pointer;
     }
 
     .product-card:hover {
@@ -49,6 +50,12 @@
     .product-card h3 {
       margin-top: 0;
       color: #27ae60;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .product-card a:hover h3 {
+      color: #1e8449;
     }
 
     .product-card p {
@@ -116,7 +123,59 @@
   object-fit: cover;  
   border-radius: 8px;
   margin-bottom: 15px;
+  cursor: pointer;
+  transition: transform 0.3s ease, filter 0.3s ease;
 }
+
+    .product-card a:hover .product-img {
+      transform: scale(1.05);
+      filter: brightness(1.1);
+    }
+
+    .vendor-info {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 12px;
+      border-radius: 8px;
+      margin: 12px 0;
+      border-left: 4px solid #27ae60;
+      transition: background 0.3s ease, border-left-color 0.3s ease;
+    }
+
+    .product-card a:hover .vendor-info {
+      background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    }
+
+    .vendor-info h4 {
+      margin: 0 0 8px 0;
+      color: #27ae60;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .vendor-name {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+      margin: 5px 0;
+    }
+
+    .vendor-email {
+      font-size: 12px;
+      color: #666;
+      margin: 5px 0;
+    }
+
+    .vendor-badge {
+      display: inline-block;
+      background: #27ae60;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      margin-top: 8px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -132,9 +191,20 @@
     <% products.forEach(function(product) { %>
 
     <div class="product-card">
-      <h3><%= product.name %></h3>
-      <img src="<%= product.image %>" alt="<%= product.name %>" class="product-img">
-      <p>Price: ₹<%= product.price %></p>
+      <a href="/customer/product/<%= product.id %>" style="text-decoration: none; color: inherit;">
+        <h3><%= product.name %></h3>
+        <img src="<%= product.image %>" alt="<%= product.name %>" class="product-img">
+        <p>Price: ₹<%= product.price %></p>
+
+        <% if (product.vendor_name) { %>
+          <div class="vendor-info">
+            <h4>📍 Sold By</h4>
+            <div class="vendor-name"><%= product.vendor_name %></div>
+            <div class="vendor-email"><%= product.vendor_email %></div>
+            <span class="vendor-badge">✓ Verified Vendor</span>
+          </div>
+        <% } %>
+      </a>
 
    <form action="/customer/add-to-cart" method="POST">
   <input type="hidden" name="productId" value="<%= product.id %>">
