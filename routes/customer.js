@@ -1,7 +1,6 @@
 import express from "express";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
-import { getProducts, getProductById } from "../data/products.js";
 import db from "../data/db.js";
 
 dotenv.config();
@@ -26,9 +25,21 @@ function generateOTP() {
 
 router.get("/shop", async (req, res) => {
   try {
-    const products = await getProducts();
-    res.render("customer/shop", { products });
-  } catch {
+
+    const result = await db.query(`
+      SELECT DISTINCT ON (p.id)
+        p.id,
+        p.name,
+        p.image
+      FROM products p
+      JOIN vendor_products vp ON vp.product_id = p.id
+      ORDER BY p.id
+    `);
+
+    res.render("customer/shop", { products: result.rows });
+
+  } catch (error) {
+    console.log(error);
     res.render("customer/shop", { products: [] });
   }
 });
@@ -37,14 +48,29 @@ router.get("/shop", async (req, res) => {
 
 router.get("/product/:id", async (req, res) => {
   try {
-    const product = await getProductById(parseInt(req.params.id));
 
-    if (!product) {
-      return res.redirect("/customer/shop");
-    }
+    const result = await db.query(`
+      SELECT 
+        vp.id AS vendor_product_id,
+        p.name,
+        p.description,
+        p.image,
+        vp.price,
+        v.name AS vendor_name,
+        v.email AS vendor_email
+      FROM vendor_products vp
+      JOIN products p ON vp.product_id = p.id
+      JOIN vendors v ON vp.vendor_id = v.id
+      WHERE p.id = $1
+    `,[req.params.id]);
 
-    res.render("customer/product-detail", { product });
-  } catch {
+   res.render("customer/product-detail", {
+  product: result.rows[0],
+  vendors: result.rows
+});
+
+  } catch (error) {
+    console.log(error);
     res.redirect("/customer/shop");
   }
 });
@@ -64,14 +90,15 @@ router.get("/orders", async (req, res) => {
       o.status,
       o.date,
       p.name,
-      p.price,
+      oi.price,
       oi.quantity
     FROM orders o
     JOIN order_items oi ON o.id = oi.order_id
-    JOIN products p ON oi.product_id = p.id
+    JOIN vendor_products vp ON oi.vendor_product_id = vp.id
+    JOIN products p ON vp.product_id = p.id
     WHERE o.customer_email = $1
     ORDER BY o.date DESC
-  `,[req.session.customerEmail]);
+  `, [req.session.customerEmail]);
 
   const ordersMap = {};
 
@@ -105,43 +132,88 @@ router.get("/orders", async (req, res) => {
 
 router.post("/add-to-cart", async (req, res) => {
 
-  const productId = parseInt(req.body.productId);
-  const quantity = parseInt(req.body.quantity) || 1;
+const vendorProductId = Number(req.body.vendorProductId);
+const quantity = Number(req.body.quantity) || 1;
 
-  const result = await db.query(
-    "SELECT * FROM products WHERE id=$1",
-    [productId]
-  );
+if (!vendorProductId) {
+  return res.redirect("/customer/shop");
+}
 
-  if (!result.rows.length) return res.redirect("/customer/shop");
+const result = await db.query(`
+  SELECT 
+    vp.id AS vendor_product_id,
+    p.name,
+    p.image,
+    vp.price,
+    v.name AS vendor,
+    v.email AS vendor_email
+  FROM vendor_products vp
+  JOIN products p ON vp.product_id = p.id
+  JOIN vendors v ON vp.vendor_id = v.id
+  WHERE vp.id = $1
+`, [vendorProductId]);
 
-  const product = result.rows[0];
+if (!result.rows.length) return res.redirect("/customer/shop");
 
-  if (!req.session.cart) req.session.cart = [];
+const product = result.rows[0];
 
-  const existing = req.session.cart.find(i => i.id === productId);
+if (!req.session.cart) req.session.cart = [];
 
-  if (existing) {
-    existing.quantity += quantity;
-  } else {
-    req.session.cart.push({ ...product, quantity });
-  }
+const existing = req.session.cart.find(
+  i => i.vendor_product_id === vendorProductId
+);
 
-  res.redirect("/customer/shop");
+if (existing) {
+  existing.quantity += quantity;
+} else {
+  req.session.cart.push({ ...product, quantity });
+}
+
+res.redirect("/customer/cart");
 
 });
 
+
+//   new add ed route
+router.get("/vendor-product/:id", async (req, res) => {
+  try {
+
+    const result = await db.query(`
+      SELECT 
+        vp.id AS vendor_product_id,
+        p.name,
+        p.description,
+        p.image,
+        vp.price,
+        v.name AS vendor_name,
+        v.email AS vendor_email
+      FROM vendor_products vp
+      JOIN products p ON vp.product_id = p.id
+      JOIN vendors v ON vp.vendor_id = v.id
+      WHERE vp.id = $1
+    `,[req.params.id]);
+
+  res.render("customer/product-detail", {
+  product: result.rows[0],
+  vendors: result.rows
+});
+
+  } catch (error) {
+    console.log(error);
+    res.redirect("/customer/shop");
+  }
+});
 /* ================= CART PAGE ================= */
 
-router.get("/cart", (req,res)=>{
+router.get("/cart", (req, res) => {
 
   const cart = req.session.cart || [];
 
   const total = cart.reduce(
-    (sum,item)=>sum + item.price * item.quantity,0
+    (sum, item) => sum + item.price * item.quantity, 0
   );
 
-  res.render("customer/cart",{
+  res.render("customer/cart", {
     cart,
     total
   });
@@ -150,13 +222,13 @@ router.get("/cart", (req,res)=>{
 
 /* ================= QUANTITY CONTROLS ================= */
 
-router.post("/increase-quantity",(req,res)=>{
+router.post("/increase-quantity", (req, res) => {
 
   const productId = parseInt(req.body.productId);
   const cart = req.session.cart || [];
 
-  const item = cart.find(p=>p.id === productId);
-  if(item) item.quantity++;
+  const item = cart.find(p => p.vendor_product_id === productId);
+  if (item) item.quantity++;
 
   req.session.cart = cart;
 
@@ -164,17 +236,20 @@ router.post("/increase-quantity",(req,res)=>{
 
 });
 
-router.post("/decrease-quantity",(req,res)=>{
+router.post("/decrease-quantity", (req, res) => {
 
   const productId = parseInt(req.body.productId);
   const cart = req.session.cart || [];
 
-  const item = cart.find(p=>p.id === productId);
+  const item = cart.find(p => p.vendor_product_id === productId);
 
-  if(item){
+  if (item) {
     item.quantity--;
-    if(item.quantity <= 0){
-      req.session.cart = cart.filter(p=>p.id !== productId);
+
+    if (item.quantity <= 0) {
+      req.session.cart = cart.filter(
+        p => p.vendor_product_id !== productId
+      );
     }
   }
 
@@ -182,21 +257,21 @@ router.post("/decrease-quantity",(req,res)=>{
 
 });
 
-router.post("/remove-item",(req,res)=>{
+router.post("/remove-item", (req, res) => {
 
   const productId = parseInt(req.body.productId);
 
   req.session.cart =
-    (req.session.cart || []).filter(p=>p.id !== productId);
+    (req.session.cart || []).filter(
+      p => p.vendor_product_id !== productId
+    );
 
   res.redirect("/customer/cart");
 
 });
 
 /* ================= PLACE ORDER ================= */
-
 router.post("/place-order", async (req, res) => {
-
   const { customerName, customerPhone, customerEmail } = req.body;
   const cart = req.session.cart || [];
 
@@ -205,159 +280,146 @@ router.post("/place-order", async (req, res) => {
   }
 
   try {
-
     const grandTotal = cart.reduce(
-      (t,i)=> t + i.price * i.quantity ,0
+      (t, i) => t + i.price * i.quantity, 0
     );
 
-    /* INSERT ORDER */
+    // Start transaction
+    await db.query("BEGIN");
 
     const orderResult = await db.query(
       `INSERT INTO orders
-       (customer_name, customer_phone, customer_email, total_price, status)
+        (customer_name, customer_phone, customer_email, total_price, status)
        VALUES ($1,$2,$3,$4,$5)
        RETURNING *`,
-      [customerName,customerPhone,customerEmail,grandTotal,"waiting"]
+      [customerName, customerPhone, customerEmail, grandTotal, "waiting"]
     );
 
     const newOrder = orderResult.rows[0];
 
-    /* 🔔 LIVE ORDER EVENT */
-
-    const io = req.app.get("io");
-
-    io.emit("newOrder",{
-      orderId:newOrder.id,
-      customer:newOrder.customer_name,
-      total:newOrder.total_price
-    });
-
-    /* INSERT ORDER ITEMS */
-
-    for(const item of cart){
-
+    for (const item of cart) {
       await db.query(
         `INSERT INTO order_items
-         (order_id,product_id,quantity,price)
+          (order_id, vendor_product_id, quantity, price)
          VALUES ($1,$2,$3,$4)`,
-        [newOrder.id,item.id,item.quantity,item.price]
+        [newOrder.id, item.vendor_product_id, item.quantity, item.price]
       );
-
     }
+
+    await db.query("COMMIT");
 
     req.session.cart = [];
 
-    /* FETCH ITEMS */
-
     const items = await db.query(
-      `SELECT oi.*,p.name
+      `SELECT oi.*, p.name
        FROM order_items oi
-       JOIN products p ON oi.product_id = p.id
-       WHERE oi.order_id=$1`,
+       JOIN vendor_products vp ON oi.vendor_product_id = vp.id
+       JOIN products p ON vp.product_id = p.id
+       WHERE oi.order_id = $1`,
       [newOrder.id]
     );
-
-    /* OTP */
 
     const otp = generateOTP();
 
     transporter.sendMail({
-      from:process.env.EMAIL_USER,
-      to:customerEmail,
-      subject:"Verify Your Order - OTP",
-      html:`
+      from: process.env.EMAIL_USER,
+      to: customerEmail,
+      subject: "Verify Your Order - OTP",
+      html: `
         <h2>Order Verification</h2>
         <p>Hello <b>${customerName}</b></p>
         <p>Your OTP is:</p>
         <h1>${otp}</h1>
         <p>Valid for 10 minutes</p>
       `
-    }).catch(()=>{});
+    }).catch(() => {});
 
     req.session.pendingOrder = {
-      orderData:{
-        id:newOrder.id,
-        customerName:newOrder.customer_name,
-        customerEmail:newOrder.customer_email,
-        customerPhone:newOrder.customer_phone,
-        totalPrice:newOrder.total_price,
-        status:newOrder.status,
-        items:items.rows
+      orderData: {
+        id: newOrder.id,
+        customerName: newOrder.customer_name,
+        customerEmail: newOrder.customer_email,
+        customerPhone: newOrder.customer_phone,
+        totalPrice: newOrder.total_price,
+        status: newOrder.status,
+        items: items.rows
       },
       otp,
-      attempts:0,
-      timestamp:Date.now()
+      attempts: 0,
+      timestamp: Date.now()
     };
 
     req.session.customerEmail = customerEmail;
     req.session.orderId = newOrder.id;
 
-    res.render("customer/verify-otp",{
-      orderId:newOrder.id,
+    res.render("customer/verify-otp", {
+      orderId: newOrder.id,
       customerEmail
     });
 
-  } catch(error){
-
-    res.send("Error placing order: "+error.message);
-
+  } catch (error) {
+    await db.query("ROLLBACK");
+    console.error(error);
+    res.send("Error placing order: " + error.message);
   }
-
 });
-
 /* ================= VERIFY OTP ================= */
 
-router.post("/verify-otp",(req,res)=>{
+router.post("/verify-otp", (req, res) => {
 
-  const {otp} = req.body;
+  const { otp } = req.body;
   const pending = req.session.pendingOrder;
 
   const customerEmail = req.session.customerEmail || "";
   const orderId = req.session.orderId || "";
 
-  if(!pending){
-    return res.render("customer/verify-otp",{
-      error:"Session expired",
+  if (!pending) {
+    return res.render("customer/verify-otp", {
+      error: "Session expired",
       orderId,
       customerEmail
     });
   }
 
-  if(Date.now() - pending.timestamp > 10*60*1000){
-    req.session.pendingOrder=null;
+  if (Date.now() - pending.timestamp > 10 * 60 * 1000) {
 
-    return res.render("customer/verify-otp",{
-      error:"OTP expired",
+    req.session.pendingOrder = null;
+
+    return res.render("customer/verify-otp", {
+      error: "OTP expired",
       orderId,
       customerEmail
     });
+
   }
 
   pending.attempts++;
 
-  if(pending.attempts > 5){
-    req.session.pendingOrder=null;
+  if (pending.attempts > 5) {
 
-    return res.render("customer/verify-otp",{
-      error:"Too many attempts",
+    req.session.pendingOrder = null;
+
+    return res.render("customer/verify-otp", {
+      error: "Too many attempts",
       orderId,
       customerEmail
     });
+
   }
 
-  if(otp === pending.otp){
+  if (otp === pending.otp) {
 
     const order = pending.orderData;
 
-    req.session.pendingOrder=null;
-    req.session.orderId=null;
+    req.session.pendingOrder = null;
+    req.session.orderId = null;
 
-    res.render("customer/order-success",{order});
+    res.render("customer/order-success", { order });
 
-  }else{
+  } else {
 
-    res.render("customer/verify-otp",{
-      error:`Incorrect OTP. ${5-pending.attempts} attempts left`,
+    res.render("customer/verify-otp", {
+      error: `Incorrect OTP. ${5 - pending.attempts} attempts left`,
       orderId,
       customerEmail
     });

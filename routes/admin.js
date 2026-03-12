@@ -4,32 +4,39 @@ import db from "../data/db.js";
 
 const router = express.Router();
 
+/* Admin Login Page */
 router.get("/login", (req, res) => {
   res.render("admin/login");
 });
 
+/* Admin Login */
 router.post("/login", (req, res) => {
   const { password } = req.body;
+
   if (password === "admin123") {
     req.session.isAdmin = true;
-    res.redirect("/admin");
-  } else {
-    res.render("admin/login", { error: "Wrong password" });
+    return res.redirect("/admin");
   }
+
+  res.render("admin/login", { error: "Wrong password" });
 });
 
+
+/* Admin Dashboard */
 router.get("/", async (req, res) => {
+
   if (!req.session.isAdmin) {
     return res.redirect("/admin/login");
   }
 
   try {
-    // Fetch vendors
+
+    /* Get vendors */
     const vendors = await getVendors();
 
-    // Fetch orders with order items and products details
+    /* Get orders with vendor + product info */
     const ordersResult = await db.query(`
-      SELECT 
+      SELECT
         o.id,
         o.customer_name,
         o.customer_email,
@@ -37,20 +44,39 @@ router.get("/", async (req, res) => {
         o.total_price,
         o.status,
         o.date,
-        oi.order_id,
-        oi.product_id,
+
         oi.quantity,
-        oi.price,
-        p.name as product_name
+
+        vp.id AS vendor_product_id,
+        vp.price,
+
+        p.name AS product_name,
+
+       v.name AS vendor_name
+
       FROM orders o
-      LEFT JOIN order_items oi ON o.id = oi.order_id
-      LEFT JOIN products p ON oi.product_id = p.id
+
+      LEFT JOIN order_items oi
+        ON o.id = oi.order_id
+
+      LEFT JOIN vendor_products vp
+        ON vp.id = oi.vendor_product_id
+
+      LEFT JOIN products p
+        ON p.id = vp.product_id
+
+      LEFT JOIN vendors v
+        ON v.id = vp.vendor_id
+
       ORDER BY o.id DESC
     `);
 
-    // Group orders by order ID
+
+    /* Group orders */
     const ordersMap = {};
+
     ordersResult.rows.forEach(row => {
+
       if (!ordersMap[row.id]) {
         ordersMap[row.id] = {
           id: row.id,
@@ -63,55 +89,102 @@ router.get("/", async (req, res) => {
           items: []
         };
       }
-      
-      if (row.product_id) {
+
+      if (row.product_name) {
         ordersMap[row.id].items.push({
-          productId: row.product_id,
           productName: row.product_name,
+          vendorName: row.vendor_name,
           quantity: row.quantity,
           price: row.price
         });
       }
+
     });
 
-    const formattedOrders = Object.values(ordersMap);
-    const totalEarnings = formattedOrders.reduce((sum, o) => sum + (parseFloat(o.totalPrice) || 0), 0);
 
-    const vendorCount = await db.query("SELECT COUNT(*) FROM vendors");
-    const productCount = await db.query("SELECT COUNT(*) FROM products");
+    const formattedOrders = Object.values(ordersMap);
+
+    const totalEarnings = formattedOrders.reduce(
+      (sum, order) => sum + (parseFloat(order.totalPrice) || 0),
+      0
+    );
+
+
+    /* Dashboard stats */
+
+   
+    const vendorCount = await db.query(
+  "SELECT COUNT(*) FROM vendors"
+);
+
+console.log("Vendor Count:", vendorCount.rows);
+
+    const productCount = await db.query(
+      "SELECT COUNT(*) FROM products"
+    );
+
+    const orderCount = await db.query(
+      "SELECT COUNT(*) FROM orders"
+    );
+
 
     const stats = {
       totalVendors: parseInt(vendorCount.rows[0].count),
       totalProducts: parseInt(productCount.rows[0].count),
-      totalOrders: formattedOrders.length,
-      totalRevenue: totalEarnings,
+      totalOrders: parseInt(orderCount.rows[0].count),
+      totalRevenue: totalEarnings
     };
+
 
     res.render("admin/dashboard", {
       orders: formattedOrders,
       stats: stats,
-      vendors: vendors,
+      vendors: vendors
     });
+
   } catch (error) {
+
     console.error("Admin dashboard error:", error);
+
     res.render("admin/dashboard", {
       orders: [],
-      stats: { totalVendors: 0, totalProducts: 0, totalOrders: 0, totalRevenue: 0 },
+      stats: {
+        totalVendors: 0,
+        totalProducts: 0,
+        totalOrders: 0,
+        totalRevenue: 0
+      },
       vendors: [],
       error: error.message
     });
+
   }
+
 });
 
+
+/* Approve Vendor */
 router.post("/approve-vendor/:id", async (req, res) => {
+
   const vendorId = parseInt(req.params.id);
 
-  await db.query(
-    "UPDATE vendors SET approved = true WHERE id = $1",
-    [vendorId]
-  );
+  try {
 
-  res.json({ success: true });
+    await db.query(
+      "UPDATE vendors SET approved = true WHERE id = $1",
+      [vendorId]
+    );
+
+    res.json({ success: true });
+
+  } catch (error) {
+
+    console.error(error);
+    res.json({ success: false });
+
+  }
+
 });
+
 
 export default router;

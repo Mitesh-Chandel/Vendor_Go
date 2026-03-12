@@ -3,53 +3,71 @@ import db from "./db.js";
 export async function getProducts() {
   const result = await db.query(`
     SELECT 
-      products.id,
-      products.name,
-      products.price,
-      products.description,
-      products.category,
-      products.image,
-      products.vendor_id,
-      vendors.username as vendor_name,
-      vendors.email as vendor_email
-    FROM products
-    LEFT JOIN vendors ON products.vendor_id = vendors.id
-    ORDER BY products.id DESC
+      p.name,
+      p.description,
+      p.category,
+      p.image,
+      vp.price,
+      vp.id AS vendor_product_id,
+      v.username AS vendor_name,
+      v.email AS vendor_email
+    FROM vendor_products vp
+    JOIN products p ON vp.product_id = p.id
+    JOIN vendors v ON vp.vendor_id = v.id
+    ORDER BY vp.id DESC
   `);
+
   return result.rows;
 }
 
 export async function getProductsByVendor(vendorId) {
-  const result = await db.query(
-    "SELECT * FROM products WHERE vendor_id = $1",
-    [vendorId]
-  );
+  const result = await db.query(`
+    SELECT 
+      p.name,
+      p.description,
+      p.image,
+      vp.price,
+      vp.stock,
+      vp.id AS vendor_product_id
+    FROM vendor_products vp
+    JOIN products p ON vp.product_id = p.id
+    WHERE vp.vendor_id = $1
+  `,[vendorId]);
+
   return result.rows;
 }
 
-export async function getProductById(productId) {
+export async function getProductById(vendorProductId) {
+
   const result = await db.query(`
     SELECT 
-      products.id,
-      products.name,
-      products.price,
-      products.description,
-      products.category,
-      products.image,
-      products.vendor_id,
-      vendors.username as vendor_name,
-      vendors.email as vendor_email
-    FROM products
-    LEFT JOIN vendors ON products.vendor_id = vendors.id
-    WHERE products.id = $1
-  `, [productId]);
+      p.name,
+      p.description,
+      p.category,
+      p.image,
+      vp.price,
+      vp.stock,
+      v.username AS vendor_name,
+      v.email AS vendor_email
+    FROM vendor_products vp
+    JOIN products p ON vp.product_id = p.id
+    JOIN vendors v ON vp.vendor_id = v.id
+    WHERE vp.id = $1
+  `,[vendorProductId]);
+
   return result.rows[0];
+
 }
 
-export async function addProduct(name, price, description, category, image, vendorId) {
+export async function addProduct(productId, vendorId, price, stock) {
+
   const result = await db.query(
-    "INSERT INTO products (name, price, description, category, image, vendor_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-    [name, price, description, category, image, vendorId]
+    `INSERT INTO vendor_products (product_id, vendor_id, price, stock)
+     VALUES ($1,$2,$3,$4)
+     RETURNING *`,
+    [productId, vendorId, price, stock]
   );
+
   return result.rows[0];
+
 }

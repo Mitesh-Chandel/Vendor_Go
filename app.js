@@ -8,10 +8,10 @@ import customerRoutes from "./routes/customer.js";
 import adminRoutes from "./routes/admin.js";
  
 const app = express();
-
+ 
 /* ---------- SOCKET SERVER ---------- */
 
-const server = http.createServer(app);
+const server = http.createServer(app); 
 const io = new Server(server);
 
 /* make socket accessible in routes */
@@ -26,12 +26,12 @@ app.use(express.json());
 
 app.use(
   session({
-    secret: "vendor-go-secret",
-    resave: false,
-    saveUninitialized: true,
+    secret: "vendor-go-secret",  
+    resave: false, 
+    saveUninitialized: true, 
   })
 );
-
+ 
 /* CART COUNT */
 
 app.use((req, res, next) => {
@@ -56,11 +56,11 @@ app.get("/", (req, res) => {
 
 /* ---------- SOCKET CONNECTION ---------- */
 
-io.on("connection", (socket) => {
+io.on("connection", (socket) => {  
   console.log("User connected");
 
   socket.on("disconnect", () => {
-    console.log("User disconnected");
+    console.log("User disconnected"); 
   }); 
 });
 
@@ -68,4 +68,4 @@ io.on("connection", (socket) => {
 
 server.listen(3000, () => {
   console.log("Server running on port 3000");
-});
+});    

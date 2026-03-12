@@ -1,22 +1,18 @@
 import express from "express";
 import dotenv from "dotenv";
-import { getVendors, getVendorByUsername } from "../data/vendors.js";
-import { getProducts, getProductsByVendor, addProduct } from "../data/products.js";
-import { getOrders, updateOrderStatus } from "../data/orders.js";
+import bcrypt from "bcrypt";              // ✅ import bcrypt
+import db from "../data/db.js";           // ✅ import db
+import { getVendors, getVendorByName } from "../data/vendors.js"; // ✅ use correct function
+import { getProductsByVendor } from "../data/products.js";
+import { getOrdersByVendor, updateOrderStatus } from "../data/orders.js";
 import multer from "multer";
 import path from "path";
 import nodemailer from "nodemailer";
-  import { getOrdersByVendor } from "../data/orders.js";
 
 dotenv.config();
-
 const router = express.Router();
 
-
-/* ================================
-   📧 EMAIL CONFIGURATION
-================================ */
-
+/* ================================ 📧 EMAIL CONFIG ================================ */
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -25,68 +21,50 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-/* ================================ 
-   🔐 LOGIN
-================================ */
-
+/* ================================ 🔐 LOGIN ================================ */
 router.get("/login", (req, res) => {
   res.render("vendor/login");
 });
+
 
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    const vendor = await getVendorByUsername(username);
+    // vendors table uses "name"
+    const vendor = await getVendorByName(username);
 
-    if (vendor && vendor.password === password) {
+    if (!vendor) {
+      return res.render("vendor/login", { error: "User not found" });
+    }
+
+    // compare plain text vs hashed password
+    // const match = await bcrypt.compare(password, vendor.password);
+const match = password === vendor.password;
+    if (match) {
       req.session.vendorId = vendor.id;
       req.session.vendor = vendor;
-      res.redirect("/vendor/dashboard");
+      return res.redirect("/vendor/dashboard");
     } else {
-      res.render("vendor/login", {
-        error: "Invalid credentials",
-      });
+      return res.render("vendor/login", { error: "Invalid credentials" });
     }
   } catch (error) {
+    console.error("Login error:", error);
     res.render("vendor/login", { error: "Server error" });
   }
 });
 
-/* ================================
-   📊 DASHBOARD
-================================ */
-
-// router.get("/dashboard", async (req, res) => {
-//   try {
-//     const vendorId = req.session.vendorId || 1;
-
-//     const vendorProducts = await getProductsByVendor(vendorId);
-//     const orders = await getOrdersByVendor(vendorId);
-
-//     const waitingOrders = orders.filter((o) => o.status === "waiting");
-
-//     res.render("vendor/dashboard", {
-//       products: vendorProducts,
-//       orders: waitingOrders,
-//     });
-
-//   } catch (error) {
-//     res.render("vendor/dashboard", { products: [], orders: [] });
-//   }
-// });
-
-
+/* ================================ 📊 DASHBOARD ================================ */
 router.get("/dashboard", async (req, res) => {
   try {
-    const vendorId = req.session.vendorId || 1;
+    const vendorId = req.session.vendorId;
+
+    if (!vendorId) {
+      return res.redirect("/vendor/login");
+    }
 
     const vendorProducts = await getProductsByVendor(vendorId);
     const orders = await getOrdersByVendor(vendorId);
-   
-console.log("ORDERS:", orders);
-
-    console.log("Orders:", orders);   // 👈 add this
 
     const waitingOrders = orders.filter((o) => o.status === "waiting");
 
@@ -94,27 +72,18 @@ console.log("ORDERS:", orders);
       products: vendorProducts,
       orders: waitingOrders,
     });
-
   } catch (error) {
     console.log(error);
     res.render("vendor/dashboard", { products: [], orders: [] });
   }
 });
-/* ================================
-   📦 PRODUCT IMAGE UPLOAD
-================================ */
 
+/* ================================ 📦 PRODUCT IMAGE UPLOAD ================================ */
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "public/uploads/");
-  },
-  filename: function (req, file, cb) {
-    const uniqueName = Date.now() + path.extname(file.originalname);
-    cb(null, uniqueName);
-  },
+  destination: (req, file, cb) => cb(null, "public/uploads/"),
+  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname)),
 });
-
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
 router.get("/add-product", (req, res) => {
   res.render("vendor/add-product");
@@ -128,27 +97,39 @@ router.post("/add-product", upload.single("image"), async (req, res) => {
   }
 
   try {
-    const vendorId = req.session.vendorId || 1;
+    const vendorId = req.session.vendorId;
+    if (!vendorId) return res.redirect("/vendor/login");
+
     const imagePath = "/uploads/" + req.file.filename;
 
-    await addProduct(name, parseFloat(price), description, category, imagePath, vendorId);
+    const productResult = await db.query(
+      `INSERT INTO products (name, description, category, image)
+       VALUES ($1,$2,$3,$4)
+       RETURNING id`,
+      [name, description, category, imagePath]
+    );
+
+    const productId = productResult.rows[0].id;
+
+    await db.query(
+      `INSERT INTO vendor_products (vendor_id, product_id, price, stock)
+       VALUES ($1,$2,$3,$4)`,
+      [vendorId, productId, price, 10]
+    );
+
     res.redirect("/vendor/dashboard");
   } catch (error) {
-  console.log(error);   // shows error in terminal
-  res.send("Error adding product");
-}
+    console.log(error);
+    res.send("Error adding product");
+  }
 });
 
-/* ================================
-   ✅ ACCEPT ORDER + EMAIL
-================================ */
-
+/* ================================ ✅ ACCEPT ORDER + EMAIL ================================ */
 router.post("/accept/:id", async (req, res) => {
   try {
     const orderId = req.params.id;
     const updatedOrder = await updateOrderStatus(orderId, "accepted");
 
-    // 📧 Send Email
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: updatedOrder.customer_email,
@@ -167,16 +148,12 @@ router.post("/accept/:id", async (req, res) => {
   }
 });
 
-/* ================================
-   ❌ REJECT ORDER + EMAIL
-================================ */
-
+/* ================================ ❌ REJECT ORDER + EMAIL ================================ */
 router.post("/reject/:id", async (req, res) => {
   try {
     const orderId = req.params.id;
     const updatedOrder = await updateOrderStatus(orderId, "rejected");
 
-    // 📧 Send Email
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: updatedOrder.customer_email,

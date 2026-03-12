@@ -243,13 +243,13 @@
         <% vendors.forEach(vendor => { %>
           <div class="vendor-card">
             <div class="vendor-info">
-              <span class="vendor-username">👤 <%= vendor.username %></span>
+              <span class="vendor-username">👤 <%= vendor.name %></span>
               <span><strong>Email:</strong> <%= vendor.email %></span>
               <span><strong>ID:</strong> #<%= vendor.id %></span>
               <span><strong>Status:</strong> 
-                <span class="vendor-status <%= vendor.verified ? '' : 'unverified' %>">
-                  <%= vendor.verified ? '✓ Verified' : '⚠ Unverified' %>
-                </span>
+                <span class="vendor-status <%= vendor.approved ? '' : 'unverified' %>">
+  <%= vendor.approved ? '✓ Approved' : '⚠ Pending' %>
+</span>
               </span>
               <% if (vendor.created_at) { %>
                 <span><strong>Joined:</strong> <%= new Date(vendor.created_at).toLocaleDateString() %></span>

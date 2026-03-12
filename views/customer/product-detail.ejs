@@ -292,6 +292,7 @@
       <div class="product-image">
         <img src="<%= product.image %>" alt="<%= product.name %>">
       </div>
+      
 
       <div class="product-info">
         <div class="product-category"><%= product.category %></div>
@@ -310,6 +311,7 @@
         <!-- Vendor Information -->
         <% if (product.vendor_name) { %>
           <div class="vendor-section">
+          <div>⭐ Rating: <%= Number(product.rating).toFixed(1) %></div>
             <h2>Sold By</h2>
             <div class="vendor-details">
               <div class="vendor-info">
@@ -319,11 +321,33 @@
               <span class="vendor-badge">✓ Verified</span>
             </div>
           </div>
-        <% } %>
+          <h3>Other Vendors</h3>
+
+<% vendors.forEach((v,index)=>{ %>
+
+  <% if(index !== 0){ %>
+
+  <a href="/customer/vendor-product/<%= v.vendor_product_id %>" 
+     style="text-decoration:none;color:black">
+
+  <div style="border:1px solid #ddd;padding:10px;margin:10px 0">
+
+    <b><%= v.vendor_name %></b><br>
+    Price: ₹<%= v.price %><br>
+    ⭐ <%= Number(v.rating).toFixed(1) %>
+
+  </div>
+
+  </a>
+
+  <% } %>
+<% }) %>
+
+<% } %>
 
         <!-- Add to Cart Form -->
         <form action="/customer/add-to-cart" method="POST">
-          <input type="hidden" name="productId" value="<%= product.id %>">
+          <input type="hidden" name="vendorProductId" value="<%= product.vendor_product_id %>">
           
           <div class="add-to-cart-section">
             <div class="quantity-selector">

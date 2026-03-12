@@ -1,5 +1,0 @@
-id,name,price,description,category,image,vendor_id,created_at
-1,Burger,120,Cheese Burger,Fast Food,/uploads/burger.jpg,1,2026-03-01
-2,Pizza,250,Large Veg Pizza,Fast Food,/uploads/pizza.jpg,1,2026-03-01
-3,Cold Coffee,80,Chilled Coffee,Beverage,/uploads/coffee.jpg,2,2026-03-02
-4,Sandwich,90,Grilled Sandwich,Snacks,/uploads/sandwich.jpg,3,2026-03-03 
