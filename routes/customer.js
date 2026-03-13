@@ -30,13 +30,17 @@ router.get("/shop", async (req, res) => {
       SELECT DISTINCT ON (p.id)
         p.id,
         p.name,
-        p.image
+        p.image,
+        vp.price,
+        vp.id AS vendor_product_id
       FROM products p
       JOIN vendor_products vp ON vp.product_id = p.id
-      ORDER BY p.id
+      ORDER BY p.id, vp.price ASC
     `);
 
-    res.render("customer/shop", { products: result.rows });
+    res.render("customer/shop", {
+      products: result.rows
+    });
 
   } catch (error) {
     console.log(error);
@@ -58,6 +62,7 @@ router.get("/product/:id", async (req, res) => {
         vp.price,
         v.name AS vendor_name,
         v.email AS vendor_email
+    
       FROM vendor_products vp
       JOIN products p ON vp.product_id = p.id
       JOIN vendors v ON vp.vendor_id = v.id
@@ -177,8 +182,10 @@ res.redirect("/customer/cart");
 //   new add ed route
 router.get("/vendor-product/:id", async (req, res) => {
   try {
-
-    const result = await db.query(`
+    const vendorProductId = req.params.id;
+    
+    // Step 1: Get specific vendor product details
+    const specificResult = await db.query(`
       SELECT 
         vp.id AS vendor_product_id,
         p.name,
@@ -186,23 +193,42 @@ router.get("/vendor-product/:id", async (req, res) => {
         p.image,
         vp.price,
         v.name AS vendor_name,
-        v.email AS vendor_email
+        v.email AS vendor_email,
+        vp.product_id  -- Need this for step 2
       FROM vendor_products vp
       JOIN products p ON vp.product_id = p.id
       JOIN vendors v ON vp.vendor_id = v.id
       WHERE vp.id = $1
-    `,[req.params.id]);
+    `, [vendorProductId]);
 
-  res.render("customer/product-detail", {
-  product: result.rows[0],
-  vendors: result.rows
-});
+    if (specificResult.rows.length === 0) {
+      return res.redirect("/customer/shop");
+    }
 
+    const product = specificResult.rows[0];
+    
+    // Step 2: Get ALL vendors for the same product
+    const allVendorsResult = await db.query(`
+      SELECT 
+        vp.id AS vendor_product_id,
+        vp.price,
+        v.name AS vendor_name,
+        v.email AS vendor_email
+      FROM vendor_products vp
+      JOIN vendors v ON vp.vendor_id = v.id
+      WHERE vp.product_id = $1
+    `, [product.product_id]);
+
+    res.render("customer/product-detail", {
+      product,
+      vendors: allVendorsResult.rows  // Now has all vendors!
+    });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.redirect("/customer/shop");
   }
 });
+
 /* ================= CART PAGE ================= */
 
 router.get("/cart", (req, res) => {

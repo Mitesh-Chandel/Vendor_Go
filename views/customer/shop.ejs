@@ -3,180 +3,136 @@
 <head>
   <title>Customer Shop</title>
   <style>
-   
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f5f5f5;
-      margin: 0;
-      padding: 0;
-      color: #333;
-    }
 
-    a {
-      text-decoration: none;
-      color: #27ae60;
-      font-weight: bold;
-    }
-
-    
-    .shop-container {
-      max-width: 1200px;
-      margin: 30px auto;
-      padding: 0 20px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      justify-content: center;
-    }
-
-    .product-card {
-      background: white;
-      border-radius: 10px;
-      padding: 20px;
-      width: 280px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      cursor: pointer;
-    }
-
-    .product-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-    }
-
-    .product-card h3 {
-      margin-top: 0;
-      color: #27ae60;
-      cursor: pointer;
-      transition: color 0.3s ease;
-    }
-
-    .product-card a:hover h3 {
-      color: #1e8449;
-    }
-
-    .product-card p {
-      margin: 5px 0 15px;
-      font-size: 16px;
-    }
-
- 
-    .product-card form {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .product-card input[type="text"],
-    .product-card input[type="tel"],
-    .product-card input[type="number"] {
-      padding: 8px;
-      margin: 5px 0 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 14px;
-    }
-
-    .product-card input[type="number"] {
-      width: 70px;
-    }
-
-    .product-card button {
-      padding: 10px;
-      background-color: #27ae60;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background-color 0.3s ease;
-    }
-
-    .product-card button:hover {
-      background-color: #219150;
-    }
-
-    
-    .no-products {
-      text-align: center;
-      font-size: 18px;
-      margin: 50px 0;
-      color: #555;
-    }
-
-   
-    @media (max-width: 768px) {
-      .shop-container {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .product-card {
-        width: 90%;
-      }
-    }
-    .product-img {
-  width: 100%;
-  height: 180px;     
-  object-fit: cover;  
-  border-radius: 8px;
-  margin-bottom: 15px;
-  cursor: pointer;
-  transition: transform 0.3s ease, filter 0.3s ease;
+body{
+  font-family: 'Segoe UI', sans-serif;
+  background:#f4f6f9;
+  margin:0;
 }
 
-    .product-card a:hover .product-img {
-      transform: scale(1.05);
-      filter: brightness(1.1);
-    }
+/* TITLE */
 
-    .vendor-info {
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      padding: 12px;
-      border-radius: 8px;
-      margin: 12px 0;
-      border-left: 4px solid #27ae60;
-      transition: background 0.3s ease, border-left-color 0.3s ease;
-    }
+h1{
+  text-align:center;
+  margin-top:30px;
+  color:#27ae60;
+}
 
-    .product-card a:hover .vendor-info {
-      background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-    }
+/* SHOP GRID */
 
-    .vendor-info h4 {
-      margin: 0 0 8px 0;
-      color: #27ae60;
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+.shop-container{
+  max-width:1200px;
+  margin:30px auto;
+  padding:0 20px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:25px;
+}
 
-    .vendor-name {
-      font-size: 16px;
-      font-weight: bold;
-      color: #333;
-      margin: 5px 0;
-    }
+/* CARD */
 
-    .vendor-email {
-      font-size: 12px;
-      color: #666;
-      margin: 5px 0;
-    }
+.product-card{
+  background:white;
+  border-radius:12px;
+  padding:18px;
+  box-shadow:0 8px 18px rgba(0,0,0,0.08);
+  transition:all .3s ease;
+}
 
-    .vendor-badge {
-      display: inline-block;
-      background: #27ae60;
-      color: white;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      margin-top: 8px;
-      font-weight: bold;
-    }
-  </style>
+.product-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 12px 24px rgba(0,0,0,0.15);
+}
+
+/* IMAGE */
+
+.product-img{
+  width:100%;
+  height:180px;
+  object-fit:cover;
+  border-radius:8px;
+  margin:10px 0;
+  transition:.3s;
+}
+
+.product-card:hover .product-img{
+  transform:scale(1.04);
+}
+
+/* PRODUCT NAME */
+
+.product-card h3{
+  margin:0;
+  font-size:20px;
+  color:#2c3e50;
+}
+
+/* PRICE */
+
+.price{
+  font-size:18px;
+  font-weight:bold;
+  color:#27ae60;
+  margin-bottom:10px;
+}
+
+/* VENDOR BOX */
+
+.vendor-info{
+  background:#f8f9fa;
+  padding:10px;
+  border-radius:6px;
+  border-left:4px solid #27ae60;
+  margin:10px 0;
+}
+
+.vendor-name{
+  font-weight:bold;
+  font-size:15px;
+}
+
+.vendor-email{
+  font-size:12px;
+  color:#777;
+}
+
+/* QUANTITY INPUT */
+
+input[type="number"]{
+  padding:6px;
+  width:70px;
+  border:1px solid #ccc;
+  border-radius:4px;
+}
+
+/* BUTTON */
+
+button{
+  margin-top:8px;
+  padding:10px;
+  border:none;
+  border-radius:6px;
+  background:#f39c12;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  transition:.3s;
+}
+
+button:hover{
+  background:#d68910;
+}
+
+/* NO PRODUCTS */
+
+.no-products{
+  text-align:center;
+  font-size:18px;
+  color:#555;
+  margin-top:40px;
+}
+
+</style>
 </head>
 <body>
   <%- include('../partials/navbar') %>

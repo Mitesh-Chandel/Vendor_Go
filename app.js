@@ -10,13 +10,13 @@ import adminRoutes from "./routes/admin.js";
 const app = express();
  
 /* ---------- SOCKET SERVER ---------- */
-
+ 
 const server = http.createServer(app); 
 const io = new Server(server);
 
 /* make socket accessible in routes */
 app.set("io", io);
-
+  
 /* ---------- MIDDLEWARE ---------- */
 
 app.use(express.static("public"));

@@ -3,279 +3,176 @@
 <head>
   <title><%= product.name %> - Vendor Go</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+.product-detail-container {
+  max-width: 1100px;
+  margin: 30px auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f5f5f5;
-      color: #333;
-    }
+.back-button {
+  display: inline-block;
+  margin-bottom: 15px;
+  color: #27ae60;
+  text-decoration: none;
+  font-weight: bold;
+}
 
-    .product-detail-container {
-      max-width: 1000px;
-      margin: 30px auto;
-      padding: 20px;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
+.breadcrumb {
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #555;
+}
 
-    .breadcrumb {
-      margin-bottom: 20px;
-      font-size: 14px;
-      color: #666;
-    }
+.breadcrumb-category {
+  color: #27ae60;
+  font-weight: bold;
+}
 
-    .breadcrumb a {
-      color: #27ae60;
-      text-decoration: none;
-      font-weight: bold;
-    }
+.product-main {
+  display: flex;
+  gap: 40px;
+}
 
-    .breadcrumb a:hover {
-      text-decoration: underline;
-    }
+.product-image img {
+  max-width: 350px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
 
-    .product-main {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
-      margin-bottom: 40px;
-    }
+.product-info {
+  flex: 1;
+}
 
-    .product-image {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #f9f9f9;
-      border-radius: 10px;
-      overflow: hidden;
-    }
+.product-category {
+  font-size: 14px;
+  color: #777;
+  margin-bottom: 5px;
+}
 
-    .product-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      max-height: 500px;
-    }
+.product-info h1 {
+  margin: 5px 0 15px;
+  font-size: 28px;
+  color: #333;
+}
 
-    .product-info h1 {
-      font-size: 32px;
-      color: #27ae60;
-      margin-bottom: 15px;
-      font-weight: bold;
-    }
+.product-description {
+  margin-bottom: 20px;
+  line-height: 1.6;
+  color: #555;
+}
 
-    .product-category {
-      display: inline-block;
-      background: #e8f5e9;
-      color: #27ae60;
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: bold;
-      margin-bottom: 15px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+.product-price {
+  font-size: 22px;
+  font-weight: bold;
+  color: #27ae60;
+  margin-bottom: 20px;
+}
 
-    .product-description {
-      color: #666;
-      line-height: 1.6;
-      margin-bottom: 20px;
-      font-size: 15px;
-    }
+.cart-form {
+  margin-bottom: 30px;
+}
 
-    .product-price {
-      font-size: 36px;
-      color: #27ae60;
-      font-weight: bold;
-      margin-bottom: 30px;
-    }
+.quantity-selector {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
 
-    .vendor-section {
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 30px;
-      border-left: 5px solid #27ae60;
-    }
+.quantity-selector button {
+  background: #eee;
+  border: 1px solid #ccc;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 16px;
+}
 
-    .vendor-section h2 {
-      font-size: 16px;
-      color: #27ae60;
-      margin-bottom: 15px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      display: flex;
-      align-items: center;
-    }
+.quantity-selector input {
+  width: 50px;
+  text-align: center;
+  border: 1px solid #ccc;
+  margin: 0 8px;
+  font-size: 16px;
+}
 
-    .vendor-section h2::before {
-      content: "📍";
-      margin-right: 8px;
-      font-size: 20px;
-    }
+.add-to-cart-btn {
+  background: #27ae60;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.3s;
+}
 
-    .vendor-details {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
+.add-to-cart-btn:hover {
+  background: #219150;
+}
 
-    .vendor-info {
-      flex: 1;
-      min-width: 200px;
-    }
+.vendor-section {
+  margin-top: 20px;
+}
 
-    .vendor-name {
-      font-size: 20px;
-      font-weight: bold;
-      color: #333;
-      margin-bottom: 8px;
-    }
+.vendor-details {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f9f9f9;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
 
-    .vendor-email {
-      font-size: 14px;
-      color: #666;
-      display: flex;
-      align-items: center;
-    }
+.vendor-name {
+  font-weight: bold;
+  color: #333;
+}
 
-    .vendor-email::before {
-      content: "✉️";
-      margin-right: 8px;
-    }
+.vendor-email {
+  font-size: 14px;
+  color: #777;
+}
 
-    .vendor-badge {
-      display: inline-block;
-      background: #27ae60;
-      color: white;
-      padding: 8px 15px;
-      border-radius: 25px;
-      font-size: 12px;
-      font-weight: bold;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+.vendor-badge {
+  color: #27ae60;
+  font-weight: bold;
+}
 
-    .add-to-cart-section {
-      display: flex;
-      gap: 15px;
-      align-items: center;
-      margin-bottom: 30px;
-    }
+.other-vendors {
+  margin-top: 25px;
+}
 
-    .quantity-selector {
-      display: flex;
-      align-items: center;
-      border: 2px solid #ddd;
-      border-radius: 5px;
-      width: fit-content;
-    }
+.vendor-card-link {
+  text-decoration: none;
+  color: inherit;
+}
 
-    .quantity-selector button {
-      background: #f5f5f5;
-      border: none;
-      padding: 8px 12px;
-      cursor: pointer;
-      font-weight: bold;
-      color: #27ae60;
-      transition: background 0.3s ease;
-    }
+.vendor-card {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+  transition: box-shadow 0.2s;
+}
 
-    .quantity-selector button:hover {
-      background: #e8e8e8;
-    }
+.vendor-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
 
-    .quantity-selector input {
-      border: none;
-      width: 50px;
-      text-align: center;
-      font-size: 16px;
-      font-weight: bold;
-    }
+.vendor-email-small {
+  font-size: 13px;
+  color: #777;
+}
 
-    .add-to-cart-btn {
-      flex: 1;
-      padding: 12px 30px;
-      background: #f39c12;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s ease;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .add-to-cart-btn:hover {
-      background: #e67e22;
-    }
-
-    .back-button {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 15px;
-      background: #27ae60;
-      color: white;
-      text-decoration: none;
-      border-radius: 5px;
-      font-weight: bold;
-      transition: background 0.3s ease;
-      margin-bottom: 20px;
-    }
-
-    .back-button:hover {
-      background: #219150;
-    }
-
-    .back-button::before {
-      content: "←";
-      font-size: 18px;
-    }
-
-    @media (max-width: 768px) {
-      .product-main {
-        grid-template-columns: 1fr;
-        gap: 20px;
-      }
-
-      .product-info h1 {
-        font-size: 24px;
-      }
-
-      .product-price {
-        font-size: 28px;
-      }
-
-      .vendor-details {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .add-to-cart-section {
-        flex-direction: column;
-      }
-
-      .add-to-cart-btn {
-        width: 100%;
-      }
-
-      .quantity-selector {
-        width: 100%;
-      }
-    }
-  </style>
+.vendor-card-price {
+  font-weight: bold;
+  color: #27ae60;
+}
+</style>
 </head>
 <body>
   <%- include('../partials/navbar') %>
@@ -292,7 +189,6 @@
       <div class="product-image">
         <img src="<%= product.image %>" alt="<%= product.name %>">
       </div>
-      
 
       <div class="product-info">
         <div class="product-category"><%= product.category %></div>
@@ -307,12 +203,23 @@
         </p>
 
         <div class="product-price">₹<%= product.price %></div>
+        <form action="/customer/add-to-cart" method="POST">
+  <input type="hidden" name="vendorProductId" value="<%= product.vendor_product_id %>">
+
+  <div class="quantity-selector">
+    <button type="button" onclick="decreaseQty()">-</button>
+    <input type="text" id="quantity" name="quantity" value="1" readonly>
+    <button type="button" onclick="increaseQty()">+</button>
+  </div>
+
+  <button type="submit" class="add-to-cart-btn">Add to Cart</button>
+</form>
 
         <!-- Vendor Information -->
         <% if (product.vendor_name) { %>
           <div class="vendor-section">
-          <div>⭐ Rating: <%= Number(product.rating).toFixed(1) %></div>
             <h2>Sold By</h2>
+
             <div class="vendor-details">
               <div class="vendor-info">
                 <div class="vendor-name"><%= product.vendor_name %></div>
@@ -321,43 +228,35 @@
               <span class="vendor-badge">✓ Verified</span>
             </div>
           </div>
-          <h3>Other Vendors</h3>
 
-<% vendors.forEach((v,index)=>{ %>
+          <!-- Other Vendors -->
+          <div class="other-vendors">
+            <h3>Other Vendors</h3>
 
-  <% if(index !== 0){ %>
+            <% 
+            const otherVendors = vendors.filter(v => v.vendor_product_id !== product.vendor_product_id);
+            %>
 
-  <a href="/customer/vendor-product/<%= v.vendor_product_id %>" 
-     style="text-decoration:none;color:black">
-
-  <div style="border:1px solid #ddd;padding:10px;margin:10px 0">
-
-    <b><%= v.vendor_name %></b><br>
-    Price: ₹<%= v.price %><br>
-    ⭐ <%= Number(v.rating).toFixed(1) %>
-
-  </div>
-
-  </a>
-
-  <% } %>
-<% }) %>
-
-<% } %>
-
-        <!-- Add to Cart Form -->
-        <form action="/customer/add-to-cart" method="POST">
-          <input type="hidden" name="vendorProductId" value="<%= product.vendor_product_id %>">
-          
-          <div class="add-to-cart-section">
-            <div class="quantity-selector">
-              <button type="button" onclick="decreaseQty()">−</button>
-              <input type="number" id="quantity" name="quantity" value="1" min="1" readonly>
-              <button type="button" onclick="increaseQty()">+</button>
-            </div>
-            <button type="submit" class="add-to-cart-btn">Add to Cart</button>
+            <% if (otherVendors.length > 0) { %>
+              <% otherVendors.forEach(function(v) { %>
+                <a href="/customer/vendor-product/<%= v.vendor_product_id %>" style="text-decoration:none;color:black">
+                  <div class="vendor-card">
+                    <div>
+                      <b><%= v.vendor_name %></b><br>
+                      <span style="font-size:13px;color:#777"><%= v.vendor_email %></span>
+                    </div>
+                    <div class="vendor-card-price">
+                      ₹<%= v.price %>
+                    </div>
+                  </div>
+                </a>
+              <% }) %>
+            <% } else { %>
+              <p>No other vendors available</p>
+            <% } %>
           </div>
-        </form>
+        <% } %> <!-- Closing if(product.vendor_name) -->
+
       </div>
     </div>
   </div>
@@ -377,5 +276,6 @@
       }
     }
   </script>
-</body>
+</body> 
+</html>
 </html>
