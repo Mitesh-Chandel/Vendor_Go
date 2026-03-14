@@ -190,6 +190,7 @@
                 <h3>Finalize Your Order</h3>
                 <form action="/customer/place-order" method="POST">
                     <input type="text" name="customerName" placeholder="Enter Full Name" required>
+                    <input type="email" name="customerEmail" placeholder="Enter Email" required>
                     <input type="tel" name="customerPhone" placeholder="Mobile Number" required>
                     <button type="submit" class="btn-order">
                         Confirm Order (₹<%= total %>)

@@ -1,98 +1,75 @@
-export const products = [
-  {
-    id: 1,
-    name: "Tomato",
-    price: 20,
-    category: "Vegetable",
-    vendorId: 1,
-    image: "/images/tomato.jpg",
-  },
-  {
-    id: 2,
-    name: "Potato",
-    price: 25,
-    category: "Vegetable",
-    vendorId: 1,
-    image: "/images/potato.jpg",
-  },
-  {
-    id: 3,
-    name: "Onion",
-    price: 30,
-    category: "Vegetable",
-    vendorId: 2,
-    image: "/images/onion.jpg",
-  },
-  {
-    id: 4,
-    name: "Carrot",
-    price: 40,
-    category: "Vegetable",
-    vendorId: 2,
-    image: "/images/carrot.jpg",
-  },
-  {
-    id: 5,
-    name: "Apple",
-    price: 120,
-    category: "Fruit",
-    vendorId: 3,
-    image: "/images/apple.jpg",
-  },
-  {
-    id: 6,
-    name: "Banana",
-    price: 50,
-    category: "Fruit",
-    vendorId: 3,
-    image: "/images/banana.jpg",
-  },
-  {
-    id: 7,
-    name: "Orange",
-    price: 80,
-    category: "Fruit",
-    vendorId: 4,
-    image: "/images/orange.jpg",
-  },
-  {
-    id: 8,
-    name: "Mango",
-    price: 150,
-    category: "Fruit",
-    vendorId: 4,
-    image: "/images/mango.jpg",
-  },
-  {
-    id: 9,
-    name: "Spinach",
-    price: 15,
-    category: "Leafy",
-    vendorId: 5,
-    image: "/images/spinach.jpg",
-  },
-  {
-    id: 10,
-    name: "Cabbage",
-    price: 35,
-    category: "Vegetable",
-    vendorId: 5,
-    image: "/images/cabbage.jpg",
-  },
-  {
-    id: 11,
-    name: "Lemon",
-    price: 15,
-    category: "Fruit",
-    vendorId: 5,
-    image: "/images/lemon.jpg",
-  },
-  {
-    id: 12,
-    name: "Dragon fruit",
-    price: 150,
-    category: "Fruit",
-    vendorId: 5,
-    image: "/images/dragon.jpg",
-  },
-];
+import db from "./db.js";
+
+export async function getProducts() {
+  const result = await db.query(`
+    SELECT 
+      p.name,
+      p.description,
+      p.category,
+      p.image,
+      vp.price,
+      vp.id AS vendor_product_id,
+      v.username AS vendor_name,
+      v.email AS vendor_email
+    FROM vendor_products vp
+    JOIN products p ON vp.product_id = p.id
+    JOIN vendors v ON vp.vendor_id = v.id
+    ORDER BY vp.id DESC
+  `);
+
+  return result.rows;
+}
+
+export async function getProductsByVendor(vendorId) {
+  const result = await db.query(`
+    SELECT 
+      p.name,
+      p.description,
+      p.image,
+      vp.price,
+      vp.stock,
+      vp.id AS vendor_product_id
+    FROM vendor_products vp
+    JOIN products p ON vp.product_id = p.id
+    WHERE vp.vendor_id = $1
+  `,[vendorId]);
+
+  return result.rows;
+}
+
+export async function getProductById(vendorProductId) {
+
+  const result = await db.query(`
+    SELECT 
+      p.name,
+      p.description,
+      p.category,
+      p.image,
+      vp.price,
+      vp.stock,
+      v.username AS vendor_name,
+      v.email AS vendor_email
+    FROM vendor_products vp
+    JOIN products p ON vp.product_id = p.id
+    JOIN vendors v ON vp.vendor_id = v.id
+    WHERE vp.id = $1
+  `,[vendorProductId]);
+
+  return result.rows[0];
+
+}
+
+export async function addVendorProduct(productId, vendorId, price, stock) {
+
+  const result =await db.query(
+  `INSERT INTO vendor_products (vendor_id, product_id, price, stock)
+   VALUES ($1,$2,$3,$4)
+   ON CONFLICT (vendor_id, product_id)
+   DO UPDATE SET price=$3, stock=$4`,
+  [vendorId, productId, price, 10]
+);
+
+  return result.rows[0];
+}
+
+ 
