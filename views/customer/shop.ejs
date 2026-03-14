@@ -173,10 +173,13 @@ button:hover{
 
   
 
-   <form action="/customer/add-to-cart" method="POST">
-  <input type="hidden" name="productId" value="<%= product.vendor_product_id %>">
+  <form action="/customer/add-to-cart" method="POST">
 
-  <label for="qty-<%= product.vendor_product_id %>" style="font-size: 12px; color: #666;">Quantity:</label>
+  <input type="hidden" name="vendorProductId" value="<%= product.vendor_product_id %>">
+
+  <label for="qty-<%= product.vendor_product_id %>" style="font-size:12px;color:#666;">
+    Quantity:
+  </label>
 
   <input 
     type="number"
@@ -187,9 +190,10 @@ button:hover{
     required
   >
 
-  <button type="submit" style="background-color: #f39c12;">
+  <button type="submit">
     Add to Cart
   </button>
+
 </form>
     </div>
 

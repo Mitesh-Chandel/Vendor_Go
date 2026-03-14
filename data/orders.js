@@ -1,16 +1,21 @@
 import db from "./db.js";
 
+/* ================= CREATE ORDER ================= */
+
 export async function createOrder(customerName, customerEmail, customerPhone, totalPrice) {
   const result = await db.query(
     `INSERT INTO orders 
-    (customer_name, customer_email, customer_phone, total_price, status) 
-    VALUES ($1,$2,$3,$4,$5) 
+    (customer_name, customer_email, customer_phone, total_price) 
+    VALUES ($1,$2,$3,$4) 
     RETURNING *`,
-    [customerName, customerEmail, customerPhone, totalPrice, "waiting"]
+    [customerName, customerEmail, customerPhone, totalPrice]
   );
 
   return result.rows[0];
 }
+
+
+/* ================= GET ALL ORDERS ================= */
 
 export async function getOrders() {
   const result = await db.query(
@@ -18,6 +23,9 @@ export async function getOrders() {
   );
   return result.rows;
 }
+
+
+/* ================= GET ORDER BY ID ================= */
 
 export async function getOrderById(id) {
   const result = await db.query(
@@ -27,46 +35,59 @@ export async function getOrderById(id) {
   return result.rows[0];
 }
 
-export async function updateOrderStatus(id, status) {
-  const result = await db.query(
-    "UPDATE orders SET status = $1 WHERE id = $2 RETURNING *",
-    [status, id]
-  );
-  return result.rows[0];
-}
 
-export async function addOrderItem(orderId, vendorProductId, quantity) {
+/* ================= ADD ORDER ITEM ================= */
+
+export async function addOrderItem(orderId, vendorProductId, quantity, price) {
   const result = await db.query(
     `INSERT INTO order_items 
-    (order_id, vendor_product_id, quantity) 
-    VALUES ($1,$2,$3) 
+    (order_id, vendor_product_id, quantity, price, status) 
+    VALUES ($1,$2,$3,$4,'waiting') 
     RETURNING *`,
-    [orderId, vendorProductId, quantity]
+    [orderId, vendorProductId, quantity, price]
   );
 
   return result.rows[0];
 }
 
-export async function getOrdersByVendor(vendorId) {
 
+/* ================= UPDATE ORDER ITEM STATUS ================= */
+
+export async function updateOrderItemStatus(orderItemId, status) {
+  const result = await db.query(
+    `UPDATE order_items 
+     SET status = $1 
+     WHERE id = $2 
+     RETURNING *`,
+    [status, orderItemId]
+  );
+
+  return result.rows[0];
+}
+
+
+/* ================= GET ORDERS BY VENDOR ================= */
+
+export async function getOrdersByVendor(vendorId) {
   const result = await db.query(`
     SELECT 
-      o.id,
+      oi.id AS order_item_id,
+      o.id AS order_id,
       o.customer_name,
-      o.customer_phone,
       o.customer_email,
+      o.customer_phone,
       o.total_price,
-      o.status,
-      p.name AS product_name,
-      oi.quantity
-    FROM orders o
-    JOIN order_items oi ON oi.order_id = o.id
-    JOIN vendor_products vp ON vp.id = oi.vendor_product_id
-    JOIN products p ON p.id = vp.product_id
+      oi.quantity,
+      oi.price,
+      oi.status,
+      p.name AS product_name
+    FROM order_items oi
+    JOIN orders o ON oi.order_id = o.id
+    JOIN vendor_products vp ON oi.vendor_product_id = vp.id
+    JOIN products p ON vp.product_id = p.id
     WHERE vp.vendor_id = $1
     ORDER BY o.id DESC
   `, [vendorId]);
 
   return result.rows;
-
 }

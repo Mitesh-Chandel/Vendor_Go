@@ -24,58 +24,46 @@ router.post("/login", (req, res) => {
 
 /* Admin Dashboard */
 router.get("/", async (req, res) => {
-
-  if (!req.session.isAdmin) {
-    return res.redirect("/admin/login");
-  }
-
   try {
 
-    /* Get vendors */
-    const vendors = await getVendors();
+    const vendorResult = await db.query("SELECT * FROM vendors");
+    const productResult = await db.query("SELECT * FROM products");
+    const orderResult = await db.query("SELECT * FROM orders");
 
-    /* Get orders with vendor + product info */
-    const ordersResult = await db.query(`
-      SELECT
+    const revenueResult = await db.query(
+      "SELECT COALESCE(SUM(total_price),0) as revenue FROM orders"
+    );
+
+    const stats = {
+      totalVendors: vendorResult.rows.length,
+      totalProducts: productResult.rows.length,
+      totalOrders: orderResult.rows.length,
+      totalRevenue: revenueResult.rows[0].revenue
+    };
+
+    // Recent orders with items
+    const ordersWithItems = await db.query(`
+      SELECT 
         o.id,
         o.customer_name,
         o.customer_email,
         o.customer_phone,
         o.total_price,
-        o.status,
         o.date,
-
         oi.quantity,
-
-        vp.id AS vendor_product_id,
-        vp.price,
-
-        p.name AS product_name,
-
-       v.name AS vendor_name
-
+        oi.price,
+        p.name as product_name
       FROM orders o
-
-      LEFT JOIN order_items oi
-        ON o.id = oi.order_id
-
-      LEFT JOIN vendor_products vp
-        ON vp.id = oi.vendor_product_id
-
-      LEFT JOIN products p
-        ON p.id = vp.product_id
-
-      LEFT JOIN vendors v
-        ON v.id = vp.vendor_id
-
+      LEFT JOIN order_items oi ON o.id = oi.order_id
+      LEFT JOIN vendor_products vp ON oi.vendor_product_id = vp.id
+      LEFT JOIN products p ON vp.product_id = p.id
       ORDER BY o.id DESC
+      LIMIT 10
     `);
 
-
-    /* Group orders */
     const ordersMap = {};
 
-    ordersResult.rows.forEach(row => {
+    ordersWithItems.rows.forEach(row => {
 
       if (!ordersMap[row.id]) {
         ordersMap[row.id] = {
@@ -84,8 +72,8 @@ router.get("/", async (req, res) => {
           customerEmail: row.customer_email,
           customerPhone: row.customer_phone,
           totalPrice: row.total_price,
-          status: row.status,
           date: row.date,
+          status: "waiting",
           items: []
         };
       }
@@ -93,7 +81,6 @@ router.get("/", async (req, res) => {
       if (row.product_name) {
         ordersMap[row.id].items.push({
           productName: row.product_name,
-          vendorName: row.vendor_name,
           quantity: row.quantity,
           price: row.price
         });
@@ -101,65 +88,16 @@ router.get("/", async (req, res) => {
 
     });
 
-
-    const formattedOrders = Object.values(ordersMap);
-
-    const totalEarnings = formattedOrders.reduce(
-      (sum, order) => sum + (parseFloat(order.totalPrice) || 0),
-      0
-    );
-
-
-    /* Dashboard stats */
-
-   
-    const vendorCount = await db.query(
-  "SELECT COUNT(*) FROM vendors"
-);
-
-console.log("Vendor Count:", vendorCount.rows);
-
-    const productCount = await db.query(
-      "SELECT COUNT(*) FROM products"
-    );
-
-    const orderCount = await db.query(
-      "SELECT COUNT(*) FROM orders"
-    );
-
-
-    const stats = {
-      totalVendors: parseInt(vendorCount.rows[0].count),
-      totalProducts: parseInt(productCount.rows[0].count),
-      totalOrders: parseInt(orderCount.rows[0].count),
-      totalRevenue: totalEarnings
-    };
-
-
     res.render("admin/dashboard", {
-      orders: formattedOrders,
-      stats: stats,
-      vendors: vendors
+      stats,
+      vendors: vendorResult.rows,
+      orders: Object.values(ordersMap)
     });
 
   } catch (error) {
-
-    console.error("Admin dashboard error:", error);
-
-    res.render("admin/dashboard", {
-      orders: [],
-      stats: {
-        totalVendors: 0,
-        totalProducts: 0,
-        totalOrders: 0,
-        totalRevenue: 0
-      },
-      vendors: [],
-      error: error.message
-    });
-
+    console.log(error);
+    res.send("Admin dashboard error");
   }
-
 });
 
 

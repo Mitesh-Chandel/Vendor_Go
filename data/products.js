@@ -59,15 +59,17 @@ export async function getProductById(vendorProductId) {
 
 }
 
-export async function addProduct(productId, vendorId, price, stock) {
+export async function addVendorProduct(productId, vendorId, price, stock) {
 
-  const result = await db.query(
-    `INSERT INTO vendor_products (product_id, vendor_id, price, stock)
-     VALUES ($1,$2,$3,$4)
-     RETURNING *`,
-    [productId, vendorId, price, stock]
-  );
+  const result =await db.query(
+  `INSERT INTO vendor_products (vendor_id, product_id, price, stock)
+   VALUES ($1,$2,$3,$4)
+   ON CONFLICT (vendor_id, product_id)
+   DO UPDATE SET price=$3, stock=$4`,
+  [vendorId, productId, price, 10]
+);
 
   return result.rows[0];
-
 }
+
+ 

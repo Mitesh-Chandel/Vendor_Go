@@ -18,6 +18,8 @@
 
     
     <h2>Your Products</h2>
+    <br>
+    <br>
 
 <div class="products">
   <% if (products.length === 0) { %>
@@ -68,13 +70,13 @@
   </div>
 
   <div class="order-actions">
-    <form action="/vendor/accept/<%= order.id %>" method="POST">
-      <button type="submit" class="accept-btn">Accept</button>
-    </form>
+  <form action="/vendor/accept/<%= order.order_item_id %>" method="POST">
+  <button type="submit">Accept</button>
+</form>
 
-    <form action="/vendor/reject/<%= order.id %>" method="POST">
-      <button type="submit" class="reject-btn">Reject</button>
-    </form>
+<form action="/vendor/reject/<%= order.order_item_id %>" method="POST">
+  <button type="submit">Reject</button>
+</form>
   </div>
 
 </div>

@@ -4,13 +4,22 @@ import bcrypt from "bcrypt";              // ✅ import bcrypt
 import db from "../data/db.js";           // ✅ import db
 import { getVendors, getVendorByName } from "../data/vendors.js"; // ✅ use correct function
 import { getProductsByVendor } from "../data/products.js";
-import { getOrdersByVendor, updateOrderStatus } from "../data/orders.js";
+import { getOrdersByVendor, updateOrderItemStatus } from "../data/orders.js";
 import multer from "multer";
 import path from "path";
 import nodemailer from "nodemailer";
 
 dotenv.config();
+
 const router = express.Router();
+
+
+function checkVendor(req, res, next) {
+  if (!req.session.vendorId) {
+    return res.redirect("/vendor/login");
+  }
+  next();
+}
 
 /* ================================ 📧 EMAIL CONFIG ================================ */
 const transporter = nodemailer.createTransport({
@@ -30,30 +39,26 @@ router.get("/login", (req, res) => {
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
-  try {
-    // vendors table uses "name"
-    const vendor = await getVendorByName(username);
+  const vendor = await getVendorByName(username);
 
-    if (!vendor) {
-      return res.render("vendor/login", { error: "User not found" });
-    }
+  if (!vendor) {
+    return res.render("vendor/login", { error: "User not found" });
+  }
 
-    // compare plain text vs hashed password
-    // const match = await bcrypt.compare(password, vendor.password);
-const match = password === vendor.password;
-    if (match) {
-      req.session.vendorId = vendor.id;
-      req.session.vendor = vendor;
-      return res.redirect("/vendor/dashboard");
-    } else {
-      return res.render("vendor/login", { error: "Invalid credentials" });
-    }
-  } catch (error) {
-    console.error("Login error:", error);
-    res.render("vendor/login", { error: "Server error" });
+  const match = password === vendor.password;
+
+  if (match) {
+    req.session.vendorId = vendor.id;
+    req.session.vendor = vendor;
+
+    req.session.save(() => {
+      res.redirect("/vendor/dashboard");
+    });
+
+  } else {
+    res.render("vendor/login", { error: "Invalid credentials" });
   }
 });
-
 /* ================================ 📊 DASHBOARD ================================ */
 router.get("/dashboard", async (req, res) => {
   try {
@@ -90,6 +95,13 @@ router.get("/add-product", (req, res) => {
 });
 
 router.post("/add-product", upload.single("image"), async (req, res) => {
+
+  const vendorId = req.session.vendorId;
+
+  if (!vendorId) {
+    return res.redirect("/vendor/login");
+  }
+
   const { name, price, description, category } = req.body;
 
   if (!req.file) {
@@ -97,8 +109,6 @@ router.post("/add-product", upload.single("image"), async (req, res) => {
   }
 
   try {
-    const vendorId = req.session.vendorId;
-    if (!vendorId) return res.redirect("/vendor/login");
 
     const imagePath = "/uploads/" + req.file.filename;
 
@@ -118,6 +128,7 @@ router.post("/add-product", upload.single("image"), async (req, res) => {
     );
 
     res.redirect("/vendor/dashboard");
+
   } catch (error) {
     console.log(error);
     res.send("Error adding product");
@@ -127,46 +138,36 @@ router.post("/add-product", upload.single("image"), async (req, res) => {
 /* ================================ ✅ ACCEPT ORDER + EMAIL ================================ */
 router.post("/accept/:id", async (req, res) => {
   try {
-    const orderId = req.params.id;
-    const updatedOrder = await updateOrderStatus(orderId, "accepted");
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: updatedOrder.customer_email,
-      subject: "Order Accepted 🎉",
-      html: `
-        <h2>Hello ${updatedOrder.customer_name},</h2>
-        <p>Your order has been <b style="color:green;">ACCEPTED</b>.</p>
-        <p>Total Amount: ₹${updatedOrder.total_price}</p>
-        <p>Thank you for shopping with us!</p>
-      `,
-    });
+    const orderItemId = req.params.id;
+
+    await db.query(
+      "UPDATE order_items SET status='accepted' WHERE id=$1",
+      [orderItemId]
+    );
 
     res.redirect("/vendor/dashboard");
+
   } catch (error) {
+    console.log(error);
     res.redirect("/vendor/dashboard");
   }
 });
-
 /* ================================ ❌ REJECT ORDER + EMAIL ================================ */
 router.post("/reject/:id", async (req, res) => {
   try {
-    const orderId = req.params.id;
-    const updatedOrder = await updateOrderStatus(orderId, "rejected");
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: updatedOrder.customer_email,
-      subject: "Order Rejected ❌",
-      html: `
-        <h2>Hello ${updatedOrder.customer_name},</h2>
-        <p>Your order has been <b style="color:red;">REJECTED</b>.</p>
-        <p>If you have any questions, contact support.</p>
-      `,
-    });
+    const orderItemId = req.params.id;
+
+    await db.query(
+      "UPDATE order_items SET status='rejected' WHERE id=$1",
+      [orderItemId]
+    );
 
     res.redirect("/vendor/dashboard");
+
   } catch (error) {
+    console.log(error);
     res.redirect("/vendor/dashboard");
   }
 });

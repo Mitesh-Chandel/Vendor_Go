@@ -247,8 +247,7 @@
               <span><strong>Email:</strong> <%= vendor.email %></span>
               <span><strong>ID:</strong> #<%= vendor.id %></span>
               <span><strong>Status:</strong> 
-                <span class="vendor-status <%= vendor.approved ? '' : 'unverified' %>">
-  <%= vendor.approved ? '✓ Approved' : '⚠ Pending' %>
+             <span class="vendor-status">✓ Approved</span>
 </span>
               </span>
               <% if (vendor.created_at) { %>
@@ -289,12 +288,7 @@
               <span><strong>Date:</strong> <%= o.date ? new Date(o.date).toLocaleDateString() : 'N/A' %></span>
             </div>
             
-            <div class="order-status 
-              <%= (o.status && o.status.toLowerCase() === 'waiting') ? 'status-pending' : '' %>
-              <%= (o.status && o.status.toLowerCase() === 'accepted') ? 'status-completed' : '' %>
-              <%= (o.status && o.status.toLowerCase() === 'rejected') ? 'status-cancelled' : '' %>">
-              <%= o.status %>
-            </div>
+           
           </div>
         <% }) %>
       </div>

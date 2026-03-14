@@ -24,14 +24,14 @@ app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.use(
-  session({
-    secret: "vendor-go-secret",  
+app.use( 
+  session({ 
+    secret: "vendor-go-secret",   
     resave: false, 
     saveUninitialized: true, 
-  })
-);
- 
+  }) 
+); 
+  
 /* CART COUNT */
 
 app.use((req, res, next) => {

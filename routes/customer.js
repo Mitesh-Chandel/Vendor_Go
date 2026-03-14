@@ -84,26 +84,33 @@ router.get("/product/:id", async (req, res) => {
 
 router.get("/orders", async (req, res) => {
 
+
+    if (!req.session.customerEmail) {
+    return res.render("customer/orders", { orders: [] });
+  }
+
+  console.log("Session Email:", req.session.customerEmail);
+
   if (!req.session.customerEmail) {
-    return res.redirect("/customer/shop");
+    return res.render("customer/orders", { orders: [] });
   }
 
   const result = await db.query(`
     SELECT 
       o.id,
       o.total_price,
-      o.status,
       o.date,
       p.name,
       oi.price,
-      oi.quantity
+      oi.quantity,
+      oi.status
     FROM orders o
     JOIN order_items oi ON o.id = oi.order_id
     JOIN vendor_products vp ON oi.vendor_product_id = vp.id
     JOIN products p ON vp.product_id = p.id
     WHERE o.customer_email = $1
     ORDER BY o.date DESC
-  `, [req.session.customerEmail]);
+  `,[req.session.customerEmail]);
 
   const ordersMap = {};
 
@@ -113,7 +120,6 @@ router.get("/orders", async (req, res) => {
       ordersMap[row.id] = {
         id: row.id,
         totalPrice: row.total_price,
-        status: row.status,
         date: row.date,
         displayItems: []
       };
@@ -122,7 +128,8 @@ router.get("/orders", async (req, res) => {
     ordersMap[row.id].displayItems.push({
       name: row.name,
       quantity: row.quantity,
-      price: row.price
+      price: row.price,
+      status: row.status
     });
 
   });
@@ -174,7 +181,7 @@ if (existing) {
   req.session.cart.push({ ...product, quantity });
 }
 
-res.redirect("/customer/cart");
+res.redirect("/customer/shop");
 
 });
 
@@ -298,6 +305,7 @@ router.post("/remove-item", (req, res) => {
 
 /* ================= PLACE ORDER ================= */
 router.post("/place-order", async (req, res) => {
+
   const { customerName, customerPhone, customerEmail } = req.body;
   const cart = req.session.cart || [];
 
@@ -306,36 +314,47 @@ router.post("/place-order", async (req, res) => {
   }
 
   try {
+
     const grandTotal = cart.reduce(
       (t, i) => t + i.price * i.quantity, 0
     );
 
-    // Start transaction
     await db.query("BEGIN");
 
+    // INSERT ORDER
     const orderResult = await db.query(
       `INSERT INTO orders
-        (customer_name, customer_phone, customer_email, total_price, status)
-       VALUES ($1,$2,$3,$4,$5)
+        (customer_name, customer_phone, customer_email, total_price)
+       VALUES ($1,$2,$3,$4)
        RETURNING *`,
-      [customerName, customerPhone, customerEmail, grandTotal, "waiting"]
+      [customerName, customerPhone, customerEmail, grandTotal]
     );
 
     const newOrder = orderResult.rows[0];
 
+    // INSERT ORDER ITEMS
     for (const item of cart) {
+
       await db.query(
         `INSERT INTO order_items
-          (order_id, vendor_product_id, quantity, price)
-         VALUES ($1,$2,$3,$4)`,
-        [newOrder.id, item.vendor_product_id, item.quantity, item.price]
+          (order_id, vendor_product_id, quantity, price, status)
+         VALUES ($1,$2,$3,$4,$5)`,
+        [
+          newOrder.id,
+          item.vendor_product_id,
+          item.quantity,
+          item.price,
+          "waiting"
+        ]
       );
+
     }
 
     await db.query("COMMIT");
 
     req.session.cart = [];
 
+    // FETCH ORDER ITEMS
     const items = await db.query(
       `SELECT oi.*, p.name
        FROM order_items oi
@@ -347,6 +366,7 @@ router.post("/place-order", async (req, res) => {
 
     const otp = generateOTP();
 
+    // SEND OTP EMAIL
     transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: customerEmail,
@@ -360,6 +380,7 @@ router.post("/place-order", async (req, res) => {
       `
     }).catch(() => {});
 
+    // STORE ORDER IN SESSION
     req.session.pendingOrder = {
       orderData: {
         id: newOrder.id,
@@ -367,7 +388,7 @@ router.post("/place-order", async (req, res) => {
         customerEmail: newOrder.customer_email,
         customerPhone: newOrder.customer_phone,
         totalPrice: newOrder.total_price,
-        status: newOrder.status,
+        status: "waiting",
         items: items.rows
       },
       otp,
@@ -384,10 +405,13 @@ router.post("/place-order", async (req, res) => {
     });
 
   } catch (error) {
+
     await db.query("ROLLBACK");
     console.error(error);
     res.send("Error placing order: " + error.message);
+
   }
+
 });
 /* ================= VERIFY OTP ================= */
 
@@ -399,7 +423,7 @@ router.post("/verify-otp", (req, res) => {
   const customerEmail = req.session.customerEmail || "";
   const orderId = req.session.orderId || "";
 
-  if (!pending) {
+if (!pending || !pending.otp)  {
     return res.render("customer/verify-otp", {
       error: "Session expired",
       orderId,
@@ -432,17 +456,19 @@ router.post("/verify-otp", (req, res) => {
     });
 
   }
+if (otp === pending.otp) {
 
-  if (otp === pending.otp) {
+  const order = pending.orderData;
 
-    const order = pending.orderData;
+  // SAVE EMAIL IN SESSION
+  req.session.customerEmail = order.customerEmail;
 
-    req.session.pendingOrder = null;
-    req.session.orderId = null;
+  req.session.pendingOrder = null;
+  req.session.orderId = null;
 
-    res.render("customer/order-success", { order });
+  res.render("customer/order-success", { order });
 
-  } else {
+} else {
 
     res.render("customer/verify-otp", {
       error: `Incorrect OTP. ${5 - pending.attempts} attempts left`,
