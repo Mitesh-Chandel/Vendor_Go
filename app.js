@@ -28,7 +28,7 @@ app.use(
   session({ 
     secret: "vendor-go-secret",   
     resave: false, 
-    saveUninitialized: true, 
+    saveUninitialized: false, 
   }) 
 ); 
   

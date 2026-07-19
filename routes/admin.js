@@ -1,15 +1,26 @@
 import express from "express";
-import { getVendors } from "../data/vendors.js";
 import db from "../data/db.js";
 
 const router = express.Router();
 
-/* Admin Login Page */
+/* ---------- ADMIN AUTH MIDDLEWARE ---------- */
+
+function requireAdmin(req, res, next) {
+  if (req.session.isAdmin) {
+    return next();
+  }
+
+  return res.redirect("/admin/login");
+}
+
+/* ---------- ADMIN LOGIN PAGE ---------- */
+
 router.get("/login", (req, res) => {
-  res.render("admin/login");
+  res.render("admin/login", { error: null });
 });
 
-/* Admin Login */
+/* ---------- ADMIN LOGIN ---------- */
+
 router.post("/login", (req, res) => {
   const { password } = req.body;
 
@@ -18,32 +29,45 @@ router.post("/login", (req, res) => {
     return res.redirect("/admin");
   }
 
-  res.render("admin/login", { error: "Wrong password" });
+  res.render("admin/login", {
+    error: "Wrong password",
+  });
 });
 
+/* ---------- ADMIN LOGOUT ---------- */
 
-/* Admin Dashboard */
-router.get("/", async (req, res) => {
+router.get("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error(err);
+      return res.redirect("/admin");
+    }
+
+    res.redirect("/admin/login");
+  });
+});
+
+/* ---------- ADMIN DASHBOARD ---------- */
+
+router.get("/", requireAdmin, async (req, res) => {
   try {
-
     const vendorResult = await db.query("SELECT * FROM vendors");
     const productResult = await db.query("SELECT * FROM products");
     const orderResult = await db.query("SELECT * FROM orders");
 
     const revenueResult = await db.query(
-      "SELECT COALESCE(SUM(total_price),0) as revenue FROM orders"
+      "SELECT COALESCE(SUM(total_price), 0) AS revenue FROM orders"
     );
 
     const stats = {
       totalVendors: vendorResult.rows.length,
       totalProducts: productResult.rows.length,
       totalOrders: orderResult.rows.length,
-      totalRevenue: revenueResult.rows[0].revenue
+      totalRevenue: revenueResult.rows[0].revenue,
     };
 
-    // Recent orders with items
     const ordersWithItems = await db.query(`
-      SELECT 
+      SELECT
         o.id,
         o.customer_name,
         o.customer_email,
@@ -52,7 +76,7 @@ router.get("/", async (req, res) => {
         o.date,
         oi.quantity,
         oi.price,
-        p.name as product_name
+        p.name AS product_name
       FROM orders o
       LEFT JOIN order_items oi ON o.id = oi.order_id
       LEFT JOIN vendor_products vp ON oi.vendor_product_id = vp.id
@@ -63,8 +87,7 @@ router.get("/", async (req, res) => {
 
     const ordersMap = {};
 
-    ordersWithItems.rows.forEach(row => {
-
+    ordersWithItems.rows.forEach((row) => {
       if (!ordersMap[row.id]) {
         ordersMap[row.id] = {
           id: row.id,
@@ -74,7 +97,7 @@ router.get("/", async (req, res) => {
           totalPrice: row.total_price,
           date: row.date,
           status: "waiting",
-          items: []
+          items: [],
         };
       }
 
@@ -82,47 +105,38 @@ router.get("/", async (req, res) => {
         ordersMap[row.id].items.push({
           productName: row.product_name,
           quantity: row.quantity,
-          price: row.price
+          price: row.price,
         });
       }
-
     });
 
     res.render("admin/dashboard", {
       stats,
       vendors: vendorResult.rows,
-      orders: Object.values(ordersMap)
+      orders: Object.values(ordersMap),
     });
-
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.send("Admin dashboard error");
   }
 });
 
+/* ---------- APPROVE VENDOR ---------- */
 
-/* Approve Vendor */
-router.post("/approve-vendor/:id", async (req, res) => {
-
+router.post("/approve-vendor/:id", requireAdmin, async (req, res) => {
   const vendorId = parseInt(req.params.id);
 
   try {
-
     await db.query(
       "UPDATE vendors SET approved = true WHERE id = $1",
       [vendorId]
     );
 
     res.json({ success: true });
-
   } catch (error) {
-
     console.error(error);
     res.json({ success: false });
-
   }
-
 });
-
 
 export default router;
