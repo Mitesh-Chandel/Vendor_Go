@@ -58,6 +58,8 @@ vendor_go_project/
 ├── package.json             # Project dependencies and metadata
 ├── README.md                # Project documentation
 ├── SETUP_GUIDE.md          # Installation and setup instructions
+├── schema.sql              # Database schema
+├── .env.example            # Environment variables template
 │
 ├── data/                    # Database utilities and models
 │   ├── db.js               # Database connection configuration
@@ -167,6 +169,7 @@ vendor_go_project/
 ## 📚 Documentation
 
 - **SETUP_GUIDE.md**: Comprehensive setup and installation instructions, database configuration, and environment variables
+- **schema.sql**: Complete database schema with detailed comments
 
 ## 🎯 Development Workflow
 
@@ -184,7 +187,7 @@ The application uses PostgreSQL with the following main entities:
 - **Orders**: Customer orders with order items
 - **Sessions**: User session management
 
-Refer to `/data` directory for detailed database operations.
+Refer to `/data` directory and `schema.sql` for detailed database operations.
 
 ## 🛡️ Environment Variables
 
